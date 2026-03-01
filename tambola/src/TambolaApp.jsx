@@ -14,6 +14,7 @@ import ActivePrizes from './ActivePrizes.jsx';
 import PrizesAdmin from './PrizesAdmin.jsx';
 import TicketCard from './TicketCard.jsx';
 import { generateTicket } from './ticketGenerator.js';
+import { savePrizes } from './prizesData.js';
 import { syncGameToRoom, startGame } from './roomService.js';
 import { LANGUAGES, getPhrase } from './tambolaPhrases.js';
 import { trackGameCompletion, markPromptShown, markPromptDismissed, requestNativeReview } from './ratingPrompt.js';
@@ -245,6 +246,13 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
         setCalledNumbers([]);
         setCurrentNumber(null);
         saveGame([], null);
+        // Reset active prizes for the new round but KEEP them enabled
+        if (prizes && onPrizesChange) {
+            const wipedPrizes = prizes.map(p => ({ ...p, claimed: false, winnerName: '' }));
+            onPrizesChange(wipedPrizes);
+            savePrizes(wipedPrizes);
+        }
+
         const shouldPrompt = trackGameCompletion();
         if (shouldPrompt) {
             setShowRatingPrompt(true);
