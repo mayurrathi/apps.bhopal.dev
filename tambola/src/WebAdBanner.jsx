@@ -31,10 +31,10 @@ export default function WebAdBanner({ className = '' }) {
     if (Capacitor.isNativePlatform()) return null;
 
     return (
-        <div className={`w-full flex justify-center overflow-hidden ${className}`}>
+        <div className={`w-full flex justify-center bg-transparent ${className}`} style={{ minHeight: '50px' }}>
             <ins className="adsbygoogle"
                 ref={adRef}
-                style={{ display: 'block', width: '100%' }}
+                style={{ display: 'block', width: '100%', minHeight: '50px' }}
                 data-ad-client={AD_CLIENT}
                 data-ad-slot={AD_SLOT}
                 data-ad-format="auto"

@@ -245,12 +245,12 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
     };
 
     const lastFive = calledNumbers.slice(-6, -1).reverse();
-    const isScrollable = hostTickets.length > 0;
 
     return (
-        <div className={`bg-slate-50 flex flex-col items-center text-slate-800 font-sans selection:bg-pink-200 selection:text-pink-900 ${isScrollable ? 'min-h-screen pb-24 overflow-x-hidden w-full lg:items-start' : 'h-screen w-full overflow-hidden'}`}>
-            {/* Background elements */}
-            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden max-w-[100vw]">
+        <div
+            className="flex-1 flex flex-col w-full overflow-hidden text-slate-800 font-sans lg:items-start selection:bg-pink-200 selection:text-pink-900"
+            onClick={() => setShowLangMenu(false)}
+        >    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden max-w-[100vw]">
                 <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply blur-3xl opacity-30 animate-blob" />
                 <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-yellow-300 rounded-full mix-blend-multiply blur-3xl opacity-30 animate-blob animation-delay-2000" />
             </div>
@@ -290,8 +290,12 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
                         {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
                     </button>
 
-                    <button onClick={() => setShowSettings(true)} className="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 ml-1">
+                    <button onClick={() => setShowSettings(true)} className="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 ml-1" title="Settings">
                         <Settings size={18} />
+                    </button>
+
+                    <button onClick={() => setShowShareMenu(true)} className="p-1.5 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 transition-colors" title="Share App">
+                        <Share2 size={18} />
                     </button>
 
                     {isFullScreenSupported && (
@@ -303,10 +307,10 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
             </header>
 
             {/* ── Main View Area ── */}
-            <main className={`relative z-10 w-full max-w-6xl mx-auto p-3 sm:p-4 flex flex-col lg:flex-row gap-4 flex-1 ${!isScrollable && 'min-h-0'}`}>
+            <main className="relative z-10 w-full max-w-6xl mx-auto p-3 sm:p-4 flex flex-col lg:flex-row gap-4 flex-1 min-h-0 lg:overflow-hidden pb-24 lg:pb-4">
 
                 {/* ── Game Board Side ── */}
-                <div className="flex-1 w-full flex flex-col bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white p-3 sm:p-5 min-h-0">
+                <div className="flex-1 w-full flex flex-col bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white p-3 sm:p-5 min-h-0 lg:h-full">
 
                     {/* Status Bar */}
                     <div className="flex items-center justify-between mb-3 bg-indigo-50/50 rounded-xl p-3 border border-indigo-100 shrink-0">
@@ -322,45 +326,49 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
                     </div>
 
                     {/* Board Grid - Scalable and mobile-optimized */}
-                    <div className="flex-1 min-h-[35vh] lg:min-h-[50vh] xl:min-h-[55vh] flex flex-col">
-                        <div className="flex-1 grid grid-cols-10 gap-[2px] sm:gap-1 content-start sm:content-between h-full w-full overflow-y-auto pr-1 pb-1">
+                    <div className="flex-1 flex flex-col min-h-0 container">
+                        <div
+                            className="grid grid-cols-10 gap-[2px] sm:gap-1 h-full w-full"
+                            style={{ gridTemplateRows: `repeat(${Math.ceil(MAX_NUMBERS / 10)}, minmax(0, 1fr))` }}
+                        >
                             {allNumbers.map((num) => (
-                                <div key={num} className={`w-full aspect-square sm:aspect-[4/3] rounded md:rounded-lg flex items-center justify-center text-[11px] sm:text-base md:text-lg font-bold transition-all border ${getCellClass(num)}`}>
+                                <div key={num} className={`w-full h-full rounded sm:rounded-md flex items-center justify-center text-[11px] sm:text-sm md:text-base font-bold transition-all border ${getCellClass(num)}`}>
                                     {num}
                                 </div>
                             ))}
                         </div>
                     </div>
-
-
-                    {/* Sticky Controls (Always at the bottom of the board module) */}
-                    <div className="grid grid-cols-2 gap-2 mt-3 shrink-0">
-                        <button onClick={() => setIsAutoPlay(!isAutoPlay)} disabled={calledNumbers.length >= MAX_NUMBERS}
-                            className={`py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 border shadow-sm transition-all focus:scale-95 ${isAutoPlay ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200'}`}>
-                            {isAutoPlay ? (<><Pause size={18} /><span className="w-4 text-center">{countdown}</span></>) : (<><Play size={18} /> Auto</>)}
-                        </button>
-
-                        <button onClick={callNextNumber} disabled={isAutoPlay || calledNumbers.length >= MAX_NUMBERS}
-                            className="py-3.5 rounded-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex items-center justify-center gap-2 hover:from-indigo-700 hover:to-purple-700 shadow-md focus:scale-95 disabled:opacity-50 transition-all">
-                            Next <ChevronRight size={18} />
-                        </button>
-
-                        {!isScrollable && (
-                            <button onClick={() => setTicketAmount(1)} className="col-span-2 py-2.5 mt-1 border border-dashed border-indigo-200 bg-indigo-50/30 text-indigo-600 rounded-xl font-semibold text-sm hover:bg-indigo-50 hover:border-indigo-300 transition-colors flex items-center justify-center gap-2">
-                                <Ticket size={16} /> Show Your Tickets
-                            </button>
-                        )}
-                    </div>
                 </div>
 
-                {/* ── Tickets Side (Only if generated) ── */}
-                {isScrollable && (
-                    <div className="w-full lg:w-96 shrink-0 flex flex-col gap-3">
-                        <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-4 shadow-lg border border-white sticky top-4 max-h-[90vh] flex flex-col">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                                    <Ticket className="text-indigo-500 w-5 h-5" /> My Tickets
-                                </h3>
+                {/* ── Right Side Panel ── */}
+                <div className="w-full lg:w-96 shrink-0 flex flex-col gap-3 lg:gap-4 lg:h-full">
+                    {/* Controls Card */}
+                    <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-3 sm:p-4 shadow-lg border border-white flex flex-col gap-2 relative z-20 shrink-0">
+                        <div className="grid grid-cols-3 gap-2">
+                            <button onClick={() => setIsAutoPlay(!isAutoPlay)} disabled={calledNumbers.length >= MAX_NUMBERS}
+                                className={`py-3 sm:py-4 rounded-xl font-bold flex items-center justify-center gap-1.5 sm:gap-2 border shadow-sm transition-all focus:scale-95 ${isAutoPlay ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200'}`}>
+                                {isAutoPlay ? (<><Pause size={18} /><span className="w-4 text-center">{countdown}</span></>) : (<><Play size={18} /> Auto</>)}
+                            </button>
+
+                            <button onClick={callNextNumber} disabled={isAutoPlay || calledNumbers.length >= MAX_NUMBERS}
+                                className="py-3 sm:py-4 rounded-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex items-center justify-center gap-1.5 sm:gap-2 hover:from-indigo-700 hover:to-purple-700 shadow-md focus:scale-95 disabled:opacity-50 transition-all">
+                                Next <ChevronRight size={18} />
+                            </button>
+
+                            <button onClick={triggerReset}
+                                className="py-3 sm:py-4 bg-rose-50 text-rose-600 rounded-xl font-bold hover:bg-rose-100 shadow-sm border border-rose-100 transition-colors flex items-center justify-center gap-1.5 sm:gap-2">
+                                <RotateCcw size={18} /> <span className="hidden sm:inline">Reset</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Tickets Card */}
+                    <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-4 shadow-lg border border-white flex flex-col min-h-[400px] lg:min-h-0 lg:flex-1 overflow-hidden">
+                        <div className="flex items-center justify-between mb-4 shrink-0">
+                            <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                                <Ticket className="text-indigo-500 w-5 h-5" /> Host Tickets
+                            </h3>
+                            {hostTickets.length > 0 && (
                                 <div className="flex items-center gap-2 bg-slate-50 rounded-lg p-1 border border-slate-100">
                                     <button onClick={() => {
                                         const newTickets = [];
@@ -370,16 +378,26 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
                                     <span className="text-xs font-bold text-slate-600 px-2">{hostTickets.length}</span>
                                     <button onClick={() => setHostTickets([])} className="p-1 text-rose-500 hover:bg-rose-100 rounded-md transition-colors"><Trash2 size={16} /></button>
                                 </div>
-                            </div>
+                            )}
+                        </div>
 
+                        {hostTickets.length === 0 ? (
+                            <div className="flex-1 flex flex-col items-center justify-center text-center px-4">
+                                <Ticket size={48} className="text-slate-200 mb-4" />
+                                <p className="text-slate-500 font-medium text-sm mb-6">Are you also playing? Generate tickets here to play along.</p>
+                                <button onClick={() => { setTicketAmount(1); setHostTickets([generateTicket()]); }} className="w-full py-3 bg-indigo-50 text-indigo-600 rounded-xl font-bold hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2 shadow-sm border border-indigo-100">
+                                    <Ticket size={18} /> Show Your Tickets
+                                </button>
+                            </div>
+                        ) : (
                             <div className="flex-1 flex flex-col gap-3 overflow-y-auto pr-1 pb-4">
                                 {hostTickets.map((ticket, idx) => (
                                     <TicketCard key={idx} ticket={ticket} ticketIndex={idx} marked={calledNumbers.reduce((acc, n) => ({ ...acc, [n]: true }), {})} toggleNumber={() => { }} />
                                 ))}
                             </div>
-                        </div>
+                        )}
                     </div>
-                )}
+                </div>
             </main>
 
             {/* ── Settings Modal ── */}
@@ -444,14 +462,6 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
                     </div>
                 </div>
             )}
-
-            {/* ── Share FAB ── */}
-            <button
-                onClick={() => setShowShareMenu(true)}
-                className="fixed bottom-6 right-6 lg:bottom-10 lg:right-10 bg-gradient-to-r from-pink-500 to-rose-500 text-white w-14 h-14 rounded-full shadow-xl shadow-pink-500/30 hover:scale-110 active:scale-95 transition-all z-40 flex items-center justify-center group"
-            >
-                <Share2 size={24} className="group-hover:animate-pulse" />
-            </button>
 
             {/* ── Share Modal ── */}
             {showShareMenu && (

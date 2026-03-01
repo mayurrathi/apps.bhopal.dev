@@ -100,31 +100,36 @@ export default function App() {
               <ArrowRight className="relative z-10 text-indigo-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
             </button>
 
+            {firebaseReady !== false && (
+              <button
+                onClick={() => { setActiveTab('multi'); setRoleAssigned(true); }}
+                className="group relative w-full flex items-center p-4 bg-white border-2 border-purple-100 rounded-2xl hover:border-purple-600 hover:shadow-lg hover:shadow-purple-100 transition-all text-left overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="absolute inset-0 bg-purple-50/50 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300" />
+                <div className="relative z-10 bg-purple-100 text-purple-600 p-3 rounded-xl mr-4">
+                  <Users size={24} />
+                </div>
+                <div className="relative z-10 flex-1">
+                  <h3 className="text-lg font-bold text-slate-800">Join a Room</h3>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">Play tickets with friends online</p>
+                </div>
+                <ArrowRight className="relative z-10 text-purple-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
+              </button>
+            )}
+
             <button
-              onClick={() => { setActiveTab('multi'); setRoleAssigned(true); }}
-              className="group relative w-full flex items-center p-4 bg-white border-2 border-purple-100 rounded-2xl hover:border-purple-600 hover:shadow-lg hover:shadow-purple-100 transition-all text-left overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={firebaseReady === false}
+              onClick={() => { setActiveTab('tickets'); setRoleAssigned(true); }}
+              className="group relative w-full flex items-center p-4 bg-white border-2 border-emerald-100 rounded-2xl hover:border-emerald-600 hover:shadow-lg hover:shadow-emerald-100 transition-all text-left overflow-hidden"
             >
-              <div className="absolute inset-0 bg-purple-50/50 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300" />
-              <div className="relative z-10 bg-purple-100 text-purple-600 p-3 rounded-xl mr-4">
-                <Users size={24} />
+              <div className="absolute inset-0 bg-emerald-50/50 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300" />
+              <div className="relative z-10 bg-emerald-100 text-emerald-600 p-3 rounded-xl mr-4">
+                <Ticket size={24} />
               </div>
               <div className="relative z-10 flex-1">
-                <h3 className="text-lg font-bold text-slate-800">Join a Room</h3>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">Play tickets with friends online</p>
+                <h3 className="text-lg font-bold text-slate-800">Player Tickets</h3>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">Play offline with your own tickets</p>
               </div>
-              {firebaseReady === false ? (
-                <WifiOff className="relative z-10 text-slate-400" />
-              ) : (
-                <ArrowRight className="relative z-10 text-purple-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
-              )}
-            </button>
-            {firebaseReady === false && <p className="text-[10px] text-rose-500 font-bold mt-1">Multiplayer unavailable (Offline Mode)</p>}
-          </div>
-
-          <div className="mt-8 pt-6 border-t border-slate-100 w-full text-center">
-            <button onClick={() => { setActiveTab('tickets'); setRoleAssigned(true); }} className="text-sm font-bold text-slate-400 hover:text-indigo-600 transition-colors flex items-center justify-center gap-1.5 mx-auto">
-              <Ticket size={16} /> Just need offline tickets?
+              <ArrowRight className="relative z-10 text-emerald-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
             </button>
           </div>
         </div>
