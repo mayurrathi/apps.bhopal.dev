@@ -16,7 +16,7 @@ import TicketCard from './TicketCard.jsx';
 import { generateTicket } from './ticketGenerator.js';
 import { savePrizes } from './prizesData.js';
 import { syncGameToRoom, startGame } from './roomService.js';
-import { LANGUAGES, getPhrase } from './tambolaPhrases.js';
+import { LANGUAGES, getPhrase, getBestVoice } from './tambolaPhrases.js';
 import { trackGameCompletion, markPromptShown, markPromptDismissed, requestNativeReview } from './ratingPrompt.js';
 
 // --- Firebase Initialization ---
@@ -141,14 +141,37 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
     const speakNumber = (num) => {
         if (!soundEnabled) return;
 
-        // Force strictly to the pre-rendered Neural Audio MP3s (English and Hindi)
+        const fallbackSpeak = () => {
+            if (!speechRef.current) return;
+            speechRef.current.cancel();
+
+            const phrase = phrasesEnabled ? getPhrase(language, num) : null;
+            const textToSpeak = phrase ? `${num}... ${phrase}` : `${num}`;
+
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            const voice = getBestVoice(language);
+            if (voice) utterance.voice = voice;
+            utterance.lang = LANGUAGES[language]?.code || 'en-US';
+            utterance.rate = language === 'hi' ? 0.85 : 0.9;
+            speechRef.current.speak(utterance);
+            console.log(`Fallback TTS played for ${num}`);
+        };
+
+        // Try pre-rendered Neural Audio MP3s (English and Hindi)
         const folder = phrasesEnabled ? 'phrases' : 'numbers';
         const audioPath = `${import.meta.env.BASE_URL}audio/${language}/${folder}/${num}.mp3`;
         const audio = new Audio(audioPath);
 
-        audio.play().catch(e => {
-            console.warn('Neural MP3 failed to play.', e);
-        });
+        // If the audio URL throws a 404 or fails to decode
+        audio.addEventListener('error', fallbackSpeak);
+
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(() => {
+                // Network interruption or file entirely missing
+                fallbackSpeak();
+            });
+        }
     };
 
     const speakAmbient = (text) => {
