@@ -173,9 +173,10 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
         if (!soundEnabled) return;
 
         // Native High-Quality Audio Override (Zero-Cost Neural Voice via edge-tts)
-        // Note: The pre-rendered MP3s contain the full phrases. If the user disables phrases, we must fallback to standard TTS.
-        if (language === 'hi' && phrasesEnabled) {
-            const audio = new Audio(`/audio/hi/${num}.mp3`);
+        if (language === 'hi') {
+            const folder = phrasesEnabled ? 'phrases' : 'numbers';
+            const audioPath = `${import.meta.env.BASE_URL}audio/hi/${folder}/${num}.mp3`;
+            const audio = new Audio(audioPath);
             audio.play().catch(e => {
                 console.warn('Native audio failed, falling back to TTS', e);
                 speakNumberTTS(num);
