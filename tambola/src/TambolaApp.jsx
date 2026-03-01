@@ -107,6 +107,11 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
         return () => unsub();
     }, [user]);
 
+    // Persist calledNumbers to localStorage so TicketsTab can read them
+    useEffect(() => {
+        localStorage.setItem('tambola_called_numbers', JSON.stringify(calledNumbers));
+    }, [calledNumbers]);
+
     const saveGame = async (called, current) => {
         if (!user) return;
         setIsSyncing(true);

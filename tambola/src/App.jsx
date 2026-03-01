@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Grid3X3, Trophy, Users, Wallet, WifiOff, Ticket, PlaySquare, ArrowRight, ChevronDown } from 'lucide-react';
+import { Grid3X3, Trophy, Users, Wallet, WifiOff, Ticket, PlaySquare, ArrowRight, ChevronDown, User } from 'lucide-react';
 import TambolaApp from './TambolaApp.jsx';
 import WalletTab from './WalletTab.jsx';
 import TicketsTab from './TicketsTab.jsx';
 import WebAdBanner from './WebAdBanner.jsx';
 import { loadPrizes } from './prizesData.js';
 import { checkFirebaseAvailability } from './firebaseStatus.js';
+import { getProfile, updateNickname } from './playerProfile.js';
 
 export default function App() {
   const [roleAssigned, setRoleAssigned] = useState(false);
@@ -20,6 +21,11 @@ export default function App() {
 
   // Multiplayer room state — shared between App and TambolaApp (for host sync)
   const [activeRoomCode, setActiveRoomCode] = useState(null);
+
+  // Guest profile — zero friction
+  const [profile, setProfile] = useState(() => getProfile());
+  const [editingName, setEditingName] = useState(false);
+  const [tempName, setTempName] = useState('');
 
   // Check Firebase on mount
   useEffect(() => {
@@ -113,8 +119,33 @@ export default function App() {
             <Grid3X3 className="w-10 h-10 text-white" />
           </div>
 
-          <h1 className="text-3xl font-black text-slate-800 mb-2">{text.title}</h1>
-          <p className="text-slate-500 font-medium mb-8">{text.subtitle}</p>
+          <h1 className="text-3xl font-black text-slate-800 mb-1">{text.title}</h1>
+
+          {/* Guest Profile — inline, non-blocking */}
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-2xl">{profile.avatar}</span>
+            {editingName ? (
+              <form onSubmit={(e) => { e.preventDefault(); const p = updateNickname(tempName); setProfile(p); setEditingName(false); }} className="flex gap-1">
+                <input
+                  type="text"
+                  value={tempName}
+                  onChange={(e) => setTempName(e.target.value)}
+                  placeholder="Your name..."
+                  autoFocus
+                  className="text-sm font-bold text-slate-700 bg-indigo-50 border border-indigo-200 rounded-lg px-2 py-1 outline-none focus:ring-2 ring-indigo-400/50 w-32"
+                  maxLength={20}
+                />
+                <button type="submit" className="text-xs font-bold text-indigo-600 hover:text-indigo-800">✓</button>
+                <button type="button" onClick={() => setEditingName(false)} className="text-xs text-slate-400">✕</button>
+              </form>
+            ) : (
+              <button onClick={() => { setTempName(profile.nickname); setEditingName(true); }} className="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
+                {profile.nickname} ✏️
+              </button>
+            )}
+          </div>
+
+          <p className="text-slate-500 font-medium mb-6 -mt-2 text-sm">{text.subtitle}</p>
 
           <div className="w-full flex flex-col gap-4">
             <button

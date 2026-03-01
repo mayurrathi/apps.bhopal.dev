@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Ticket, Trash2, Plus, Minus, CheckCircle2 } from 'lucide-react';
+import { Ticket, Trash2, Plus, Minus, CheckCircle2, Bot } from 'lucide-react';
 import { generateTicket } from './ticketGenerator.js';
 import TicketCard from './TicketCard.jsx';
 
 const LOCAL_KEY = 'tambola_my_tickets';
 const LOCAL_MARKS_KEY = 'tambola_my_marks';
+const AUTO_DAUB_KEY = 'tambola_auto_daub';
+const CALLED_KEY = 'tambola_called_numbers';
 
 export default function TicketsTab() {
     const [tickets, setTickets] = useState([]);
     const [marked, setMarked] = useState({});
     const [amount, setAmount] = useState(1);
     const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+    const [autoDaub, setAutoDaub] = useState(() => {
+        try { return JSON.parse(localStorage.getItem(AUTO_DAUB_KEY)) || false; } catch { return false; }
+    });
+    const [calledNumbers, setCalledNumbers] = useState([]);
 
     // Load from local storage on mount
     useEffect(() => {
@@ -24,6 +30,19 @@ export default function TicketsTab() {
         }
     }, []);
 
+    // Poll calledNumbers from localStorage (host writes them)
+    useEffect(() => {
+        const poll = () => {
+            try {
+                const stored = localStorage.getItem(CALLED_KEY);
+                if (stored) setCalledNumbers(JSON.parse(stored));
+            } catch (e) { /* silently ignore */ }
+        };
+        poll();
+        const interval = setInterval(poll, 1000); // check every second
+        return () => clearInterval(interval);
+    }, []);
+
     // Save to local storage when state changes
     useEffect(() => {
         localStorage.setItem(LOCAL_KEY, JSON.stringify(tickets));
@@ -32,6 +51,10 @@ export default function TicketsTab() {
     useEffect(() => {
         localStorage.setItem(LOCAL_MARKS_KEY, JSON.stringify(marked));
     }, [marked]);
+
+    useEffect(() => {
+        localStorage.setItem(AUTO_DAUB_KEY, JSON.stringify(autoDaub));
+    }, [autoDaub]);
 
     const handleGenerate = () => {
         const newTickets = [];
@@ -105,18 +128,43 @@ export default function TicketsTab() {
     return (
         <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-24">
             {/* Header / Action Bar */}
-            <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 sticky top-[72px] z-40 bg-white/90 backdrop-blur-md">
+            <div className="flex items-center justify-between mb-4 bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-200 sticky top-[72px] z-40 bg-white/90 backdrop-blur-md">
                 <div className="flex flex-col">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Tickets</span>
                     <span className="text-lg font-black text-indigo-700">{tickets.length} Playing</span>
                 </div>
-                <button
-                    onClick={() => setShowCancelConfirm(true)}
-                    className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold rounded-xl text-sm transition-colors flex items-center gap-1.5"
-                >
-                    <Trash2 size={16} /> Cancel All
-                </button>
+
+                <div className="flex items-center gap-2">
+                    {/* Auto-Daub Toggle */}
+                    <button
+                        onClick={() => setAutoDaub(!autoDaub)}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold transition-all ${autoDaub
+                                ? 'bg-blue-500 text-white shadow-lg shadow-blue-200'
+                                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                            }`}
+                        title="Auto-Daub: automatically marks called numbers on your tickets"
+                    >
+                        <Bot size={16} />
+                        <span className="hidden sm:inline">Auto</span>
+                    </button>
+
+                    {/* Cancel All */}
+                    <button
+                        onClick={() => setShowCancelConfirm(true)}
+                        className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold rounded-xl text-sm transition-colors flex items-center gap-1.5"
+                    >
+                        <Trash2 size={16} /> <span className="hidden sm:inline">Cancel All</span>
+                    </button>
+                </div>
             </div>
+
+            {/* Auto-Daub indicator */}
+            {autoDaub && (
+                <div className="mb-4 px-4 py-2 bg-blue-50 border border-blue-200 rounded-xl text-blue-700 text-xs font-medium flex items-center gap-2">
+                    <Bot size={14} /> Auto-Daub is ON — called numbers are marked automatically
+                    {calledNumbers.length > 0 && <span className="ml-auto text-blue-500">{calledNumbers.length} called</span>}
+                </div>
+            )}
 
             {/* Tickets List */}
             <div className="space-y-6">
@@ -127,13 +175,15 @@ export default function TicketsTab() {
                         ticketIndex={i}
                         marked={marked}
                         toggleNumber={toggleNumber}
+                        calledNumbers={calledNumbers}
+                        autoDaub={autoDaub}
                     />
                 ))}
             </div>
 
             <div className="mt-8 text-center text-slate-400 text-xs flex items-center justify-center gap-1.5 font-medium">
                 <CheckCircle2 size={14} className="text-indigo-400" />
-                Tap a number to cross it out
+                {autoDaub ? 'Auto-daub is marking numbers for you' : 'Tap a number to cross it out'}
             </div>
 
             {/* Custom Modal for Cancel All */}
