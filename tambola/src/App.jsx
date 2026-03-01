@@ -248,13 +248,7 @@ export default function App() {
         ))}
       </div>
 
-      {/* Offline notice */}
-      {firebaseReady === false && (
-        <div className="flex items-center justify-center gap-2 bg-amber-50 border-b border-amber-200 text-amber-700 text-xs py-2 px-4 shrink-0 font-medium">
-          <WifiOff size={14} />
-          Offline mode active — Multiplayer and Online Wallet disabled.
-        </div>
-      )}
+
 
       {/* Tab Content */}
       <div className="flex-1 flex flex-col">
