@@ -132,24 +132,24 @@ export default function App() {
               <ArrowRight className="relative z-10 text-indigo-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
             </button>
 
-            <button
-              onClick={() => { setActiveTab('multi'); setRoleAssigned(true); }}
-              disabled={firebaseReady === false}
-              className="group relative w-full flex items-center p-4 bg-white border-2 border-purple-100 rounded-2xl hover:border-purple-600 hover:shadow-lg hover:shadow-purple-100 transition-all text-left overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:border-purple-100 disabled:hover:shadow-none"
-            >
-              <div className="absolute inset-0 bg-purple-50/50 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300" />
-              <div className="relative z-10 bg-purple-100 text-purple-600 p-3 rounded-xl mr-4">
-                <Users size={24} />
-              </div>
-              <div className="relative z-10 flex-1 flex flex-col justify-center">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-bold text-slate-800">{text.multiTitle}</h3>
-                  {firebaseReady === false && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider">Offline</span>}
+            {firebaseReady !== false && (
+              <button
+                onClick={() => { setActiveTab('multi'); setRoleAssigned(true); }}
+                className="group relative w-full flex items-center p-4 bg-white border-2 border-purple-100 rounded-2xl hover:border-purple-600 hover:shadow-lg hover:shadow-purple-100 transition-all text-left overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-purple-50/50 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300" />
+                <div className="relative z-10 bg-purple-100 text-purple-600 p-3 rounded-xl mr-4">
+                  <Users size={24} />
                 </div>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">{firebaseReady === false ? text.multiOffline : text.multiSub}</p>
-              </div>
-              <ArrowRight className="relative z-10 text-purple-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
-            </button>
+                <div className="relative z-10 flex-1 flex flex-col justify-center">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-slate-800">{text.multiTitle}</h3>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">{text.multiSub}</p>
+                </div>
+                <ArrowRight className="relative z-10 text-purple-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
+              </button>
+            )}
 
             <button
               onClick={() => { setActiveTab('tickets'); setRoleAssigned(true); }}
@@ -165,6 +165,25 @@ export default function App() {
               </div>
               <ArrowRight className="relative z-10 text-emerald-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
             </button>
+
+            {firebaseReady === false && (
+              <button
+                disabled
+                className="group relative w-full flex items-center p-4 bg-white border-2 border-purple-100 rounded-2xl text-left overflow-hidden opacity-60 cursor-not-allowed"
+              >
+                <div className="relative z-10 bg-purple-100 text-purple-600 p-3 rounded-xl mr-4">
+                  <Users size={24} />
+                </div>
+                <div className="relative z-10 flex-1 flex flex-col justify-center">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-slate-800">{text.multiTitle}</h3>
+                    <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider">Offline</span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">{text.multiOffline}</p>
+                </div>
+                <ArrowRight className="relative z-10 text-purple-400" />
+              </button>
+            )}
           </div>
         </div>
 

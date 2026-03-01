@@ -48,6 +48,10 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
     const [showShareMenu, setShowShareMenu] = useState(false);
     const [hostTab, setHostTab] = useState('board'); // 'board' or 'prizes'
 
+    // Dice Animation State
+    const [isRolling, setIsRolling] = useState(false);
+    const [rollerNumber, setRollerNumber] = useState(null);
+
     // Host Tickets State
     const [hostTickets, setHostTickets] = useState([]);
     const [ticketAmount, setTicketAmount] = useState(1);
@@ -155,20 +159,46 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
     };
 
     const callNextNumber = () => {
-        if (calledNumbers.length >= MAX_NUMBERS) {
-            setIsAutoPlay(false);
-            speakAmbient(t50Mode ? "T50 complete! Great game!" : "Game over! All ninety numbers called!");
+        if (calledNumbers.length >= MAX_NUMBERS || isRolling) {
+            if (calledNumbers.length >= MAX_NUMBERS) {
+                setIsAutoPlay(false);
+                speakAmbient(t50Mode ? "T50 complete! Great game!" : "Game over! All ninety numbers called!");
+            }
             return;
         }
+
+        // Generate the final result first
         let next;
         do { next = Math.floor(Math.random() * MAX_NUMBERS) + 1; }
         while (calledNumbers.includes(next));
 
-        const newCalled = [...calledNumbers, next];
+        // Start the rolling animation
+        setIsRolling(true);
+        let rollIterations = 0;
+        const maxIterations = 15; // Number of shuffles before landing
+
+        const rollerInterval = setInterval(() => {
+            rollIterations++;
+            let temp;
+            do { temp = Math.floor(Math.random() * MAX_NUMBERS) + 1; }
+            while (calledNumbers.includes(temp) && Object.keys(calledNumbers).length < MAX_NUMBERS - 1);
+            setRollerNumber(temp);
+
+            if (rollIterations >= maxIterations) {
+                clearInterval(rollerInterval);
+                finishCall(next);
+            }
+        }, 50); // 50ms per tick = 750ms total animation
+    };
+
+    const finishCall = (finalNumber) => {
+        setIsRolling(false);
+        setRollerNumber(null);
+        const newCalled = [...calledNumbers, finalNumber];
         setCalledNumbers(newCalled);
-        setCurrentNumber(next);
-        saveGame(newCalled, next);
-        speakNumber(next);
+        setCurrentNumber(finalNumber);
+        saveGame(newCalled, finalNumber);
+        speakNumber(finalNumber);
     };
 
     useEffect(() => { callNextNumberRef.current = callNextNumber; });
@@ -308,10 +338,10 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
             </header>
 
             {/* ── Main View Area ── */}
-            <main className="relative z-10 w-full max-w-6xl mx-auto p-3 sm:p-4 flex flex-col lg:flex-row gap-4 flex-1 min-h-0 lg:overflow-hidden pb-24 lg:pb-4">
+            <main className="relative z-10 w-full max-w-6xl mx-auto p-1 sm:p-2 lg:p-4 flex flex-col lg:flex-row gap-2 sm:gap-4 flex-1 min-h-0 lg:overflow-hidden pb-20 lg:pb-0">
 
                 {/* ── Game Board Side ── */}
-                <div className="flex-1 w-full flex flex-col bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white p-2 sm:p-4 lg:p-6 min-h-0 lg:h-full lg:min-h-[600px]">
+                <div className="flex-1 w-full flex flex-col bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white p-2 sm:p-3 lg:p-4 min-h-0 lg:h-full lg:min-h-[500px]">
 
                     {/* Local Host Tabs */}
                     <div className="flex bg-slate-100/50 p-1 rounded-xl mb-4 shrink-0">
@@ -329,9 +359,11 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
                             <div className="flex items-center justify-between mb-4 bg-indigo-50/50 rounded-xl p-3 sm:p-4 border border-indigo-100 shrink-0">
                                 <div className="text-xs sm:text-sm font-bold text-indigo-400 uppercase tracking-widest pl-1">Call {calledNumbers.length}/{MAX_NUMBERS}</div>
                                 <div className="flex items-center gap-3">
-                                    <span className="text-4xl sm:text-5xl font-black text-indigo-600 leading-none">{currentNumber || "--"}</span>
-                                    {currentNumber && phrasesEnabled && getPhrase(language, currentNumber) && (
-                                        <div className="text-sm sm:text-base font-bold text-indigo-800 max-w-[140px] sm:max-w-xs truncate px-3 py-1.5 bg-white rounded-lg shadow-sm">
+                                    <span className={`text-4xl sm:text-5xl font-black leading-none ${isRolling ? 'text-indigo-400 blur-[2px] scale-110 transition-all duration-75' : 'text-indigo-600'}`}>
+                                        {isRolling ? rollerNumber : (currentNumber || "--")}
+                                    </span>
+                                    {(!isRolling && currentNumber && phrasesEnabled && getPhrase(language, currentNumber)) && (
+                                        <div className="text-sm sm:text-base font-bold text-indigo-800 max-w-[140px] sm:max-w-xs truncate px-3 py-1.5 bg-white rounded-lg shadow-sm animate-fade-in-up">
                                             {getPhrase(language, currentNumber)}
                                         </div>
                                     )}
@@ -339,13 +371,13 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
                             </div>
 
                             {/* Board Grid - Supersized for laptop/desktop capture */}
-                            <div className="flex-1 flex flex-col min-h-0 w-full h-full pb-2">
+                            <div className="flex-1 flex flex-col min-h-0 w-full h-full pb-1">
                                 <div
                                     className="grid grid-cols-10 gap-1 sm:gap-2 h-full w-full"
                                     style={{ gridTemplateRows: `repeat(${Math.ceil(MAX_NUMBERS / 10)}, minmax(0, 1fr))` }}
                                 >
                                     {allNumbers.map((num) => (
-                                        <div key={num} className={`w-full h-full rounded sm:rounded-xl flex items-center justify-center transition-all border ${getCellClass(num)}`}>
+                                        <div key={num} className={`w-full h-full rounded sm:rounded-xl flex items-center justify-center transition-all border ${getCellClass(num)} ${isRolling && num === rollerNumber ? 'bg-indigo-100 border-indigo-300 scale-105 opacity-70' : ''}`}>
                                             {num}
                                         </div>
                                     ))}
@@ -364,18 +396,18 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
                     {/* Controls Card */}
                     <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-3 sm:p-4 shadow-lg border border-white flex flex-col gap-2 relative z-20 shrink-0">
                         <div className="grid grid-cols-3 gap-2">
-                            <button onClick={() => setIsAutoPlay(!isAutoPlay)} disabled={calledNumbers.length >= MAX_NUMBERS}
-                                className={`py-3 sm:py-4 rounded-xl font-bold flex items-center justify-center gap-1.5 sm:gap-2 border shadow-sm transition-all focus:scale-95 ${isAutoPlay ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200'}`}>
+                            <button onClick={() => setIsAutoPlay(!isAutoPlay)} disabled={calledNumbers.length >= MAX_NUMBERS || isRolling}
+                                className={`py-3 sm:py-4 rounded-xl font-bold flex items-center justify-center gap-1.5 sm:gap-2 border shadow-sm transition-all focus:scale-95 ${isAutoPlay ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200 disabled:opacity-50'}`}>
                                 {isAutoPlay ? (<><Pause size={18} /><span className="w-4 text-center">{countdown}</span></>) : (<><Play size={18} /> Auto</>)}
                             </button>
 
-                            <button onClick={callNextNumber} disabled={isAutoPlay || calledNumbers.length >= MAX_NUMBERS}
+                            <button onClick={callNextNumber} disabled={isAutoPlay || calledNumbers.length >= MAX_NUMBERS || isRolling}
                                 className="py-3 sm:py-4 rounded-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex items-center justify-center gap-1.5 sm:gap-2 hover:from-indigo-700 hover:to-purple-700 shadow-md focus:scale-95 disabled:opacity-50 transition-all">
                                 Next <ChevronRight size={18} />
                             </button>
 
-                            <button onClick={triggerReset}
-                                className="py-3 sm:py-4 bg-rose-50 text-rose-600 rounded-xl font-bold hover:bg-rose-100 shadow-sm border border-rose-100 transition-colors flex items-center justify-center gap-1.5 sm:gap-2">
+                            <button onClick={triggerReset} disabled={isRolling}
+                                className="py-3 sm:py-4 bg-rose-50 text-rose-600 rounded-xl font-bold hover:bg-rose-100 shadow-sm border border-rose-100 transition-colors flex items-center justify-center gap-1.5 sm:gap-2 disabled:opacity-50">
                                 <RotateCcw size={18} /> <span className="hidden sm:inline">Reset</span>
                             </button>
                         </div>
