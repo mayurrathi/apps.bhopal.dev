@@ -249,7 +249,6 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
     return (
         <div
             className="flex-1 flex flex-col w-full overflow-hidden text-slate-800 font-sans lg:items-start selection:bg-pink-200 selection:text-pink-900"
-            onClick={() => setShowLangMenu(false)}
         >    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden max-w-[100vw]">
                 <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply blur-3xl opacity-30 animate-blob" />
                 <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-yellow-300 rounded-full mix-blend-multiply blur-3xl opacity-30 animate-blob animation-delay-2000" />
