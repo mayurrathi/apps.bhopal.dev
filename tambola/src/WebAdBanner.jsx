@@ -1,40 +1,48 @@
 import React, { useEffect, useRef } from 'react';
-import { Capacitor } from '@capacitor/core';
 
 const AD_CLIENT = 'ca-pub-1891237722651167';
 const AD_SLOT = '2330837487';
 
 /**
  * WebAdBanner — Renders a responsive Google AdSense display ad.
- * Only renders on web/PWA (skips on native where AdMob handles ads).
+ * On native platforms (Capacitor), this component renders nothing
+ * since AdMob handles ads natively. On web/PWA, it loads AdSense.
  */
 export default function WebAdBanner({ className = '' }) {
     const adRef = useRef(null);
     const pushed = useRef(false);
 
-    useEffect(() => {
-        // Don't show AdSense on native platforms (AdMob handles those)
-        if (Capacitor.isNativePlatform()) return;
+    // Check if running inside a native Capacitor shell
+    const isNative = typeof window !== 'undefined' &&
+        window.Capacitor &&
+        window.Capacitor.isNativePlatform &&
+        window.Capacitor.isNativePlatform();
 
-        // Prevent double-push on React strict mode / re-renders
+    useEffect(() => {
+        if (isNative) return;
         if (pushed.current) return;
 
-        try {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-            pushed.current = true;
-        } catch (e) {
-            console.warn('[AdSense] Push failed:', e);
-        }
-    }, []);
+        // Wait for the AdSense script to initialize
+        const timer = setTimeout(() => {
+            try {
+                (window.adsbygoogle = window.adsbygoogle || []).push({});
+                pushed.current = true;
+            } catch (e) {
+                console.warn('[AdSense] Push failed:', e);
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [isNative]);
 
     // Don't render on native platforms
-    if (Capacitor.isNativePlatform()) return null;
+    if (isNative) return null;
 
     return (
-        <div className={`w-full flex justify-center bg-transparent ${className}`} style={{ minHeight: '50px' }}>
+        <div className={`w-full flex justify-center ${className}`} style={{ minHeight: '90px' }}>
             <ins className="adsbygoogle"
                 ref={adRef}
-                style={{ display: 'block', width: '100%', minHeight: '50px' }}
+                style={{ display: 'block', width: '100%', minHeight: '90px', textAlign: 'center' }}
                 data-ad-client={AD_CLIENT}
                 data-ad-slot={AD_SLOT}
                 data-ad-format="auto"

@@ -134,10 +134,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* AdSense Block on Selection Screen */}
-        <div className="mt-6 w-full max-w-md">
-          <WebAdBanner className="rounded-xl overflow-hidden shadow-sm" />
-        </div>
+        <p className="mt-6 text-xs text-slate-400 font-medium">© 2025 Tambola Master Studios</p>
       </div>
     );
   }
