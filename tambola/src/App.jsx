@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Grid3X3, Trophy, Users, Wallet, WifiOff, Ticket, PlaySquare, ArrowRight } from 'lucide-react';
+import { Grid3X3, Trophy, Users, Wallet, WifiOff, Ticket, PlaySquare, ArrowRight, ChevronDown } from 'lucide-react';
 import TambolaApp from './TambolaApp.jsx';
 import PrizesAdmin from './PrizesAdmin.jsx';
 import WalletTab from './WalletTab.jsx';
@@ -13,7 +13,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('game');
   const [prizes, setPrizes] = useState(() => loadPrizes());
   const [firebaseReady, setFirebaseReady] = useState(null); // null=checking, true/false
-  
+
   // Try to detect user language, default to en, switch to hi if Hindi detected
   const browserLang = (typeof navigator !== 'undefined' && navigator.language) ? navigator.language.toLowerCase() : 'en';
   const initialLang = browserLang.startsWith('hi') ? 'hi' : 'en';
@@ -96,7 +96,22 @@ export default function App() {
         </div>
 
         <div className="relative z-10 w-full max-w-md bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white flex flex-col items-center text-center animate-fade-in-up">
-          <div className="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-2xl shadow-xl flex items-center justify-center mb-6 transform -rotate-6">
+          {/* Language Toggle */}
+          <div className="absolute top-4 right-4">
+            <div className="relative">
+              <select
+                value={appLang}
+                onChange={(e) => setAppLang(e.target.value)}
+                className="appearance-none bg-indigo-50/80 text-indigo-700 font-bold text-xs pl-2 pr-6 py-1.5 rounded-lg outline-none cursor-pointer hover:bg-indigo-100 transition-colors border border-indigo-100"
+              >
+                <option value="en">🇬🇧 EN</option>
+                <option value="hi">🇮🇳 HI</option>
+              </select>
+              <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-indigo-500 pointer-events-none" />
+            </div>
+          </div>
+
+          <div className="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-2xl shadow-xl flex items-center justify-center mb-6 transform -rotate-6 mt-2">
             <Grid3X3 className="w-10 h-10 text-white" />
           </div>
 
@@ -130,8 +145,8 @@ export default function App() {
               </div>
               <div className="relative z-10 flex-1 flex flex-col justify-center">
                 <div className="flex items-center gap-2">
-                   <h3 className="text-lg font-bold text-slate-800">{text.multiTitle}</h3>
-                   {firebaseReady === false && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider">Offline</span>}
+                  <h3 className="text-lg font-bold text-slate-800">{text.multiTitle}</h3>
+                  {firebaseReady === false && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider">Offline</span>}
                 </div>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">{firebaseReady === false ? text.multiOffline : text.multiSub}</p>
               </div>
