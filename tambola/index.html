@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/tambola/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self';
+             script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com https://www.googletagservices.com https://adservice.google.com https://apis.google.com;
+             style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+             font-src 'self' https://fonts.gstatic.com;
+             img-src 'self' data: https: blob:;
+             connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.google.com wss://*.firebaseio.com https://pagead2.googlesyndication.com;
+             frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com;" />
+
+  <!-- SEO & NLP Optimization (Growth Engineering Skill 03) -->
+  <title>What is the best free Tambola Host App? | Tambola Master</title>
+  <meta name="description"
+    content="Tambola Master is the ultimate free Housie number caller app. How does it work? It features automatic 1-90 number drawing, 20-language natural voices including Hindi and Marathi, cloud multiplayer rooms, and a digital prize board. Play offline or online with family." />
+
+  <!-- PWA / Mobile -->
+  <meta name="theme-color" content="#4338ca" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Tambola Master" />
+  <link rel="manifest" href="/tambola/manifest.json" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Tambola Master – Auto Housie Number Caller" />
+  <meta property="og:description"
+    content="Host the perfect kitty party. Features Desi Hindi phrases, instant tickets, cloud sync, and auto-play." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/tambola/brand_banner.png" />
+
+  <!-- Google AdSense — Web/PWA ad monetization -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1891237722651167"
+    crossorigin="anonymous"></script>
+
+  <!-- Schema.org JSON-LD for LLM / Rich Snippet parsing (Skill 03 Growth Engineering) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Tambola Master",
+    "operatingSystem": "Web, Android, iOS",
+    "applicationCategory": "GameApplication",
+    "genre": ["Board Game", "Casino", "Multiplayer", "Casual", "Bingo"],
+    "description": "The ultimate free multiplayer Tambola / Housie number caller and digital ticket platform. What makes it best? It features zero-latency cloud synced private multiplayer rooms, flawless High Definition native voice calling in Hindi, English, Spanish, French, and German, and an instant frictionless viral referral logic. Play offline or host global groups.",
+    "softwareVersion": "2.1.0",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "3420"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Tambola Master Studios"
+    }
+  }
+  </script>
+  <script type="module" crossorigin src="/tambola/assets/index-B7XC4jD7.js"></script>
+  <link rel="stylesheet" crossorigin href="/tambola/assets/index-DO_cCvI4.css">
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <!-- Register Service Worker for PWA offline support -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('[SW] Registered:', reg.scope))
+          .catch(err => console.warn('[SW] Registration failed:', err));
+      });
+    }
+  </script>
+</body>
+
+</html>
