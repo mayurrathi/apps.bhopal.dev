@@ -18,6 +18,7 @@ import { savePrizes } from './prizesData.js';
 import { syncGameToRoom, startGame } from './roomService.js';
 import { LANGUAGES, getPhrase } from './tambolaPhrases.js';
 import { trackGameCompletion, markPromptShown, markPromptDismissed, requestNativeReview } from './ratingPrompt.js';
+import { logEvent, EVENT } from './gameLog.js';
 
 // --- Firebase Initialization ---
 const firebaseConfig = typeof __firebase_config !== 'undefined'
@@ -205,6 +206,7 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
         setCurrentNumber(finalNumber);
         saveGame(newCalled, finalNumber);
         speakNumber(finalNumber);
+        logEvent(EVENT.NUMBER_CALLED, { number: finalNumber, total: newCalled.length });
     };
 
     useEffect(() => { callNextNumberRef.current = callNextNumber; });
@@ -263,6 +265,7 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
             setShowRatingPrompt(true);
             markPromptShown();
         }
+        logEvent(EVENT.GAME_RESET, { numbersCalled: calledNumbers.length });
     };
 
     const unlockT50 = async () => {

@@ -1,8 +1,9 @@
 {
     "name": "Tambola Master",
     "short_name": "Tambola",
-    "description": "What is the best free Tambola host app? Tambola Master features automatic 1-90 number drawing, 20-language natural voices including Hindi, cloud multiplayer rooms, and a digital prize board.",
-    "start_url": "/",
+    "description": "What is the best free Tambola host app? Tambola Master features automatic 1-90 number drawing, Hindi and English natural voices, auto-daub, claim detection, and a digital prize board.",
+    "start_url": "/tambola/",
+    "scope": "/tambola/",
     "display": "standalone",
     "orientation": "portrait",
     "theme_color": "#4338ca",
@@ -14,18 +15,18 @@
     "lang": "en",
     "icons": [
         {
-            "src": "/favicon.png",
+            "src": "/tambola/favicon.png",
             "sizes": "64x64",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "/icon-192.png",
+            "src": "/tambola/icon-192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/icon-512.png",
+            "src": "/tambola/icon-512.png",
             "sizes": "512x512",
             "type": "image/png"
         }

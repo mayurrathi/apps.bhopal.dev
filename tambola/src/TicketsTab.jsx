@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Ticket, Trash2, Plus, Minus, CheckCircle2, Bot } from 'lucide-react';
-import { generateTicket } from './ticketGenerator.js';
+import { Ticket, Trash2, Plus, Minus, CheckCircle2, Bot, BookOpen } from 'lucide-react';
+import { generateTicket, generateTicketSet } from './ticketGenerator.js';
 import TicketCard from './TicketCard.jsx';
+import { logEvent, EVENT } from './gameLog.js';
 
 const LOCAL_KEY = 'tambola_my_tickets';
 const LOCAL_MARKS_KEY = 'tambola_my_marks';
@@ -62,7 +63,16 @@ export default function TicketsTab() {
             newTickets.push(generateTicket());
         }
         setTickets(newTickets);
-        setMarked({}); // Reset marks for new tickets
+        setMarked({});
+        logEvent(EVENT.TICKET_GENERATED, { count: amount, type: 'individual' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleGenerateBook = () => {
+        const bookTickets = generateTicketSet();
+        setTickets(bookTickets);
+        setMarked({});
+        logEvent(EVENT.TICKET_GENERATED, { count: 6, type: 'book' });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -120,6 +130,22 @@ export default function TicketsTab() {
                     >
                         <Ticket size={24} /> Generate {amount} {amount === 1 ? 'Ticket' : 'Tickets'}
                     </button>
+
+                    <div className="flex items-center gap-3 my-4">
+                        <div className="flex-1 h-px bg-slate-200" />
+                        <span className="text-xs font-bold text-slate-400 uppercase">or</span>
+                        <div className="flex-1 h-px bg-slate-200" />
+                    </div>
+
+                    <button
+                        onClick={handleGenerateBook}
+                        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-purple-200 active:scale-95 transition-all text-base flex items-center justify-center gap-2"
+                    >
+                        <BookOpen size={22} /> Generate Full Book (6 Tickets)
+                    </button>
+                    <p className="text-xs text-slate-400 text-center mt-2">
+                        Every number 1-90 appears exactly once across the book
+                    </p>
                 </div>
             </div>
         );
@@ -139,8 +165,8 @@ export default function TicketsTab() {
                     <button
                         onClick={() => setAutoDaub(!autoDaub)}
                         className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold transition-all ${autoDaub
-                                ? 'bg-blue-500 text-white shadow-lg shadow-blue-200'
-                                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                            ? 'bg-blue-500 text-white shadow-lg shadow-blue-200'
+                            : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                             }`}
                         title="Auto-Daub: automatically marks called numbers on your tickets"
                     >

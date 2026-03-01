@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { detectClaims, validateClaim } from './claimDetector.js';
+import { logEvent, EVENT } from './gameLog.js';
 
 /**
  * TicketCard.jsx
@@ -32,15 +33,18 @@ export default function TicketCard({ ticket, ticketIndex, marked, toggleNumber, 
     // Handle claim attempt
     const handleClaim = (patternId, patternName) => {
         const result = validateClaim(ticket, patternId, calledNumbers);
+        logEvent(EVENT.CLAIM_ATTEMPT, { patternId, patternName, ticketIndex });
         if (result.valid) {
             setClaimToast(`🎉 ${patternName} Claimed!`);
             setBogeyNumbers([]);
             setBogeyMessage('');
+            logEvent(EVENT.CLAIM_VALID, { patternId, patternName, ticketIndex });
             setTimeout(() => setClaimToast(''), 3000);
         } else {
             setBogeyNumbers(result.missingNumbers);
             setBogeyMessage(`❌ Bogey! ${result.missingNumbers.length} number${result.missingNumbers.length > 1 ? 's' : ''} missing`);
             setClaimToast('');
+            logEvent(EVENT.CLAIM_BOGEY, { patternId, patternName, ticketIndex, missing: result.missingNumbers });
             setTimeout(() => {
                 setBogeyNumbers([]);
                 setBogeyMessage('');

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Grid3X3, Trophy, Users, Wallet, WifiOff, Ticket, PlaySquare, ArrowRight, ChevronDown, User } from 'lucide-react';
+import { Grid3X3, Trophy, Users, Wallet, WifiOff, Ticket, PlaySquare, ArrowRight, ChevronDown, User, BarChart3 } from 'lucide-react';
 import TambolaApp from './TambolaApp.jsx';
 import WalletTab from './WalletTab.jsx';
 import TicketsTab from './TicketsTab.jsx';
+import StatsTab from './StatsTab.jsx';
 import WebAdBanner from './WebAdBanner.jsx';
 import { loadPrizes } from './prizesData.js';
 import { checkFirebaseAvailability } from './firebaseStatus.js';
@@ -66,7 +67,7 @@ export default function App() {
     { id: 'game', label: 'Host Board', icon: Grid3X3 },
     ...(firebaseReady ? [{ id: 'multi', label: 'Multiplayer', icon: Users }] : []),
     { id: 'tickets', label: 'Tickets', icon: Ticket },
-    // Hide Wallet in offline mode as requested
+    { id: 'stats', label: 'Stats', icon: BarChart3 },
     ...(firebaseReady ? [{ id: 'wallet', label: 'Wallet', icon: Wallet }] : []),
   ];
 
@@ -100,19 +101,26 @@ export default function App() {
         </div>
 
         <div className="relative z-10 w-full max-w-md bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white flex flex-col items-center text-center animate-fade-in-up">
-          {/* Language Toggle */}
-          <div className="absolute top-4 right-4">
-            <div className="relative">
-              <select
-                value={appLang}
-                onChange={(e) => setAppLang(e.target.value)}
-                className="appearance-none bg-indigo-50/80 text-indigo-700 font-bold text-xs pl-2 pr-6 py-1.5 rounded-lg outline-none cursor-pointer hover:bg-indigo-100 transition-colors border border-indigo-100"
-              >
-                <option value="en">🇬🇧 EN</option>
-                <option value="hi">🇮🇳 HI</option>
-              </select>
-              <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-indigo-500 pointer-events-none" />
-            </div>
+          {/* Language Toggle — Small clickable buttons */}
+          <div className="absolute top-4 right-4 flex gap-1">
+            <button
+              onClick={() => setAppLang('en')}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${appLang === 'en'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-indigo-50/80 text-indigo-600 hover:bg-indigo-100 border border-indigo-100'
+                }`}
+            >
+              🇬🇧 EN
+            </button>
+            <button
+              onClick={() => setAppLang('hi')}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${appLang === 'hi'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-indigo-50/80 text-indigo-600 hover:bg-indigo-100 border border-indigo-100'
+                }`}
+            >
+              🇮🇳 HI
+            </button>
           </div>
 
           <div className="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-2xl shadow-xl flex items-center justify-center mb-6 transform -rotate-6 mt-2">
@@ -273,6 +281,10 @@ export default function App() {
 
         {activeTab === 'tickets' && (
           <TicketsTab />
+        )}
+
+        {activeTab === 'stats' && (
+          <StatsTab />
         )}
 
         {activeTab === 'wallet' && firebaseReady && (
