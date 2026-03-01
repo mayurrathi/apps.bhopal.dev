@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Wallet: users can only read/write their own wallet ──────────────
+    match /tambola_wallets/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null && request.auth.uid == uid;
+      allow update: if request.auth != null && request.auth.uid == uid
+                    && request.resource.data.balance >= 0; // prevent negative balances
+    }
+
+    // ── Rooms: anyone authenticated can read, only host can modify top-level ──
+    match /tambola_rooms/{roomCode} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null
+                    && resource.data.meta.hostUid == request.auth.uid;
+      allow delete: if request.auth != null
+                    && resource.data.meta.hostUid == request.auth.uid;
+
+      // ── Players sub-collection ──
+      match /players/{playerId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null && request.auth.uid == playerId;
+        allow update: if request.auth != null && request.auth.uid == playerId;
+        allow delete: if request.auth != null
+                      && (request.auth.uid == playerId
+                          || get(/databases/$(database)/documents/tambola_rooms/$(roomCode)).data.meta.hostUid == request.auth.uid);
+      }
+
+      // ── Messages sub-collection (rate: max 200 chars, 1 msg/sec enforced client-side) ──
+      match /messages/{messageId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null
+                      && request.resource.data.uid == request.auth.uid
+                      && request.resource.data.text.size() <= 200;
+        // Messages are immutable once sent
+        allow update, delete: if false;
+      }
+    }
+
+    // ── Default deny everything else ──
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
