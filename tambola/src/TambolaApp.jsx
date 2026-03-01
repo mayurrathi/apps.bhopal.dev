@@ -11,6 +11,7 @@ import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken }
 import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
 import { showInterstitial, showRewardedAd } from './admob.js';
 import ActivePrizes from './ActivePrizes.jsx';
+import PrizesAdmin from './PrizesAdmin.jsx';
 import TicketCard from './TicketCard.jsx';
 import { generateTicket } from './ticketGenerator.js';
 import { syncGameToRoom, startGame } from './roomService.js';
@@ -45,6 +46,7 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [isFullScreenSupported, setIsFullScreenSupported] = useState(true);
     const [showShareMenu, setShowShareMenu] = useState(false);
+    const [hostTab, setHostTab] = useState('board'); // 'board' or 'prizes'
 
     // Host Tickets State
     const [hostTickets, setHostTickets] = useState([]);
@@ -239,9 +241,9 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
     const getCellClass = (num) => {
         const isCurrent = currentNumber === num;
         const isCalled = calledNumbers.includes(num);
-        if (isCurrent) return "bg-pink-500 text-white shadow-lg scale-110 ring-4 ring-pink-300 z-10 font-bold border-transparent";
-        if (isCalled) return "bg-indigo-600 text-white font-medium border-transparent opacity-90";
-        return "bg-white text-slate-400 border-slate-200 hover:border-indigo-200 focus:border-indigo-400 transition-colors duration-200";
+        if (isCurrent) return "bg-pink-500 text-white shadow-lg scale-110 ring-4 ring-pink-300 z-10 font-black border-transparent text-xl sm:text-2xl md:text-3xl";
+        if (isCalled) return "bg-indigo-600 text-white font-bold border-transparent opacity-90 text-lg sm:text-xl md:text-2xl lg:text-3xl";
+        return "bg-white text-slate-400 border-slate-200 hover:border-indigo-200 focus:border-indigo-400 transition-colors duration-200 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold";
     };
 
     const lastFive = calledNumbers.slice(-6, -1).reverse();
@@ -309,34 +311,52 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
             <main className="relative z-10 w-full max-w-6xl mx-auto p-3 sm:p-4 flex flex-col lg:flex-row gap-4 flex-1 min-h-0 lg:overflow-hidden pb-24 lg:pb-4">
 
                 {/* ── Game Board Side ── */}
-                <div className="flex-1 w-full flex flex-col bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white p-3 sm:p-5 min-h-0 lg:h-full lg:min-h-[500px]">
+                <div className="flex-1 w-full flex flex-col bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white p-2 sm:p-4 lg:p-6 min-h-0 lg:h-full lg:min-h-[600px]">
 
-                    {/* Status Bar */}
-                    <div className="flex items-center justify-between mb-3 bg-indigo-50/50 rounded-xl p-3 border border-indigo-100 shrink-0">
-                        <div className="text-xs font-bold text-indigo-400 uppercase tracking-widest pl-1">Call {calledNumbers.length}/{MAX_NUMBERS}</div>
-                        <div className="flex items-center gap-3">
-                            <span className="text-3xl sm:text-4xl font-black text-indigo-600 leading-none">{currentNumber || "--"}</span>
-                            {currentNumber && phrasesEnabled && getPhrase(language, currentNumber) && (
-                                <div className="text-xs sm:text-sm font-semibold text-indigo-800 max-w-[120px] sm:max-w-xs truncate px-2 py-1 bg-white rounded-md shadow-sm">
-                                    {getPhrase(language, currentNumber)}
-                                </div>
-                            )}
-                        </div>
+                    {/* Local Host Tabs */}
+                    <div className="flex bg-slate-100/50 p-1 rounded-xl mb-4 shrink-0">
+                        <button onClick={() => setHostTab('board')} className={`flex-1 py-2 font-bold text-sm sm:text-base rounded-lg transition-colors flex items-center justify-center gap-2 ${hostTab === 'board' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'}`}>
+                            <Grid3X3 size={18} /> Board
+                        </button>
+                        <button onClick={() => setHostTab('prizes')} className={`flex-1 py-2 font-bold text-sm sm:text-base rounded-lg transition-colors flex items-center justify-center gap-2 ${hostTab === 'prizes' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'}`}>
+                            <Trophy size={18} /> Active Prizes <span className="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.5 rounded-full">{prizes.filter(p => p.enabled).length}</span>
+                        </button>
                     </div>
 
-                    {/* Board Grid - Scalable and mobile-optimized */}
-                    <div className="flex-1 flex flex-col min-h-0 w-full h-full">
-                        <div
-                            className="grid grid-cols-10 gap-[2px] sm:gap-1 h-full w-full"
-                            style={{ gridTemplateRows: `repeat(${Math.ceil(MAX_NUMBERS / 10)}, minmax(0, 1fr))` }}
-                        >
-                            {allNumbers.map((num) => (
-                                <div key={num} className={`w-full h-full rounded sm:rounded-md flex items-center justify-center text-[11px] sm:text-sm md:text-base font-bold transition-all border ${getCellClass(num)}`}>
-                                    {num}
+                    {hostTab === 'board' ? (
+                        <>
+                            {/* Status Bar */}
+                            <div className="flex items-center justify-between mb-4 bg-indigo-50/50 rounded-xl p-3 sm:p-4 border border-indigo-100 shrink-0">
+                                <div className="text-xs sm:text-sm font-bold text-indigo-400 uppercase tracking-widest pl-1">Call {calledNumbers.length}/{MAX_NUMBERS}</div>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-4xl sm:text-5xl font-black text-indigo-600 leading-none">{currentNumber || "--"}</span>
+                                    {currentNumber && phrasesEnabled && getPhrase(language, currentNumber) && (
+                                        <div className="text-sm sm:text-base font-bold text-indigo-800 max-w-[140px] sm:max-w-xs truncate px-3 py-1.5 bg-white rounded-lg shadow-sm">
+                                            {getPhrase(language, currentNumber)}
+                                        </div>
+                                    )}
                                 </div>
-                            ))}
+                            </div>
+
+                            {/* Board Grid - Supersized for laptop/desktop capture */}
+                            <div className="flex-1 flex flex-col min-h-0 w-full h-full pb-2">
+                                <div
+                                    className="grid grid-cols-10 gap-1 sm:gap-2 h-full w-full"
+                                    style={{ gridTemplateRows: `repeat(${Math.ceil(MAX_NUMBERS / 10)}, minmax(0, 1fr))` }}
+                                >
+                                    {allNumbers.map((num) => (
+                                        <div key={num} className={`w-full h-full rounded sm:rounded-xl flex items-center justify-center transition-all border ${getCellClass(num)}`}>
+                                            {num}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex-1 overflow-y-auto">
+                            <ActivePrizes prizes={prizes} onPrizesChange={onPrizesChange} />
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* ── Right Side Panel ── */}
@@ -452,10 +472,9 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
                                 </button>
                             </div>
 
-                            {/* Active Prizes section */}
-                            <div className="pt-5 border-t border-slate-100">
-                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1"><Trophy size={12} /> Game Prizes</h4>
-                                <ActivePrizes prizes={prizes} onPrizesChange={onPrizesChange} />
+                            {/* Prize Settings Full Admin Menu inside Settings Tab */}
+                            <div className="pt-2">
+                                <PrizesAdmin prizes={prizes} onPrizesChange={onPrizesChange} />
                             </div>
                         </div>
                     </div>

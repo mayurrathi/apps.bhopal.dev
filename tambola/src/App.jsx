@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Grid3X3, Trophy, Users, Wallet, WifiOff, Ticket, PlaySquare, ArrowRight, ChevronDown } from 'lucide-react';
 import TambolaApp from './TambolaApp.jsx';
-import PrizesAdmin from './PrizesAdmin.jsx';
 import WalletTab from './WalletTab.jsx';
 import TicketsTab from './TicketsTab.jsx';
 import WebAdBanner from './WebAdBanner.jsx';
@@ -63,7 +62,6 @@ export default function App() {
     { id: 'tickets', label: 'Tickets', icon: Ticket },
     // Hide Wallet in offline mode as requested
     ...(firebaseReady ? [{ id: 'wallet', label: 'Wallet', icon: Wallet }] : []),
-    { id: 'prizes', label: 'Prizes', icon: Trophy },
   ];
 
   // Lazy-load MultiplayerTab only when Firebase is available
@@ -193,12 +191,6 @@ export default function App() {
           >
             <Icon size={16} className={activeTab === id ? 'text-indigo-600' : 'text-slate-400'} />
             <span className="hidden sm:inline">{label}</span>
-            {id === 'prizes' && (
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black hidden lg:inline ml-1 ${activeTab === id ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500'
-                }`}>
-                {prizes.filter(p => p.enabled).length}
-              </span>
-            )}
             {id === 'multi' && activeRoomCode && (
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse ml-1" />
             )}
@@ -241,12 +233,6 @@ export default function App() {
 
         {activeTab === 'wallet' && firebaseReady && (
           <WalletTab offlineMode={false} />
-        )}
-
-        {activeTab === 'prizes' && (
-          <div className="max-w-3xl mx-auto w-full p-4 md:p-6 lg:p-8 flex-1">
-            <PrizesAdmin prizes={prizes} onPrizesChange={setPrizes} />
-          </div>
         )}
       </div>
 
