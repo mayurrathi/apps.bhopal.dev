@@ -202,28 +202,14 @@
 
     <div class="header">
         <h1>Apps Portal</h1>
-        <p class="subtitle">Welcome to apps.bhopal.dev. This is the central directory for all production and
-            experimental applications hosted within the monorepo.</p>
+        <p class="subtitle">Welcome to apps.bhopal.dev. This is the central directory for apps created by the Bhopal community with love.</p>
     </div>
 
     <div class="app-grid" id="app-grid">
         <div id="loading">Loading applications...</div>
     </div>
 
-    <div class="guide-section">
-        <h2>🚀 Deployment Guide</h2>
-        <p style="color: #94a3b8; margin-bottom: 1.5rem;">How to register a new application into this portal:</p>
-        <ol>
-            <li>Create your new application in a subdirectory <code>apps.bhopal.dev/new-app-name</code>.</li>
-            <li>Configure your Vite/React <code>base</code> path to match the directory name:
-                <code>base: '/new-app-name/'</code>.</li>
-            <li>Open the root <code>apps.json</code> file and append your app's metadata to the array.</li>
-            <li>Update the <code>.github/workflows/deploy.yml</code> GitHub Actions file to include a build step for
-                your new sub-directory.</li>
-            <li>Push to <code>main</code>! The portal and sub-apps will automatically construct and deploy to GitHub
-                Pages.</li>
-        </ol>
-    </div>
+
 
     <script>
         fetch('apps.json')
