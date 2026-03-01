@@ -1,0 +1,15 @@
+[
+    {
+        "id": "tambola",
+        "name": "Tambola Master",
+        "description": "Multiplayer Housie Number Caller with Real-time Sync & 20-Language Neural Voice Engine.",
+        "path": "/tambola/",
+        "icon": "🎲",
+        "status": "Live",
+        "tags": [
+            "PWA",
+            "Firebase",
+            "Realtime"
+        ]
+    }
+]

@@ -9,127 +9,251 @@
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            height: 100vh;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             color: white;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
-        .glass-container {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 48px;
+        .header {
             text-align: center;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            max-width: 600px;
-            width: 90%;
-            transform: translateY(20px);
-            opacity: 0;
-            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            margin-top: 5rem;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
         }
 
         h1 {
-            font-size: 3rem;
-            margin-bottom: 16px;
-            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #60a5fa 0%, #a78bfa 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 800;
         }
 
-        p {
+        p.subtitle {
+            color: #94a3b8;
             font-size: 1.25rem;
+            max-width: 600px;
+            margin: 0 auto;
             line-height: 1.6;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 32px;
         }
 
-        .pulse-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            z-index: -1;
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 2rem;
+            box-sizing: border-box;
         }
 
-        .orb-1 {
-            width: 300px;
-            height: 300px;
-            background: rgba(79, 172, 254, 0.4);
-            top: -100px;
-            left: -100px;
-            animation: float 10s ease-in-out infinite;
-        }
-
-        .orb-2 {
-            width: 400px;
-            height: 400px;
-            background: rgba(142, 45, 226, 0.3);
-            bottom: -150px;
-            right: -100px;
-            animation: float 12s ease-in-out infinite reverse;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 32px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
+        .app-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
             text-decoration: none;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            color: white;
+            animation: fadeInUp 0.8s ease-out;
         }
 
-        .btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        .app-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(96, 165, 250, 0.5);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .app-icon {
+            font-size: 2.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-badge {
+            background: rgba(52, 211, 153, 0.2);
+            color: #34d399;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .app-desc {
+            color: #cbd5e1;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .guide-section {
+            margin-top: 5rem;
+            margin-bottom: 3rem;
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 800px;
+            box-sizing: border-box;
+        }
+
+        .guide-section h2 {
+            margin-top: 0;
+            color: #e2e8f0;
+        }
+
+        .guide-section ol {
+            color: #cbd5e1;
+            line-height: 1.8;
+            padding-left: 20px;
+        }
+
+        .guide-section code {
+            background: #0f172a;
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: #a78bfa;
+            font-family: monospace;
         }
 
         @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
             to {
-                transform: translateY(0);
                 opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0) scale(1);
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
             }
 
-            50% {
-                transform: translateY(-20px) scale(1.05);
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
+        }
+
+        #loading {
+            text-align: center;
+            width: 100%;
+            color: #94a3b8;
+            font-size: 1.2rem;
+            padding: 2rem;
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <div class="pulse-orb orb-1"></div>
-    <div class="pulse-orb orb-2"></div>
 
-    <div class="glass-container">
+    <div class="header">
         <h1>Apps Portal</h1>
-        <p>Welcome to apps.bhopal.dev. This is the central hub for all applications currently in development.</p>
-        <div style="display: flex; gap: 16px; justify-content: center;">
-            <a href="/tambola/" class="btn"
-                style="background: rgba(79, 172, 254, 0.2); border-color: rgba(79, 172, 254, 0.4);">🎯 Play Tambola
-                Master</a>
-            <a href="https://github.com/mayurrathi" class="btn">View on GitHub</a>
-        </div>
+        <p class="subtitle">Welcome to apps.bhopal.dev. This is the central directory for all production and
+            experimental applications hosted within the monorepo.</p>
     </div>
+
+    <div class="app-grid" id="app-grid">
+        <div id="loading">Loading applications...</div>
+    </div>
+
+    <div class="guide-section">
+        <h2>🚀 Deployment Guide</h2>
+        <p style="color: #94a3b8; margin-bottom: 1.5rem;">How to register a new application into this portal:</p>
+        <ol>
+            <li>Create your new application in a subdirectory <code>apps.bhopal.dev/new-app-name</code>.</li>
+            <li>Configure your Vite/React <code>base</code> path to match the directory name:
+                <code>base: '/new-app-name/'</code>.</li>
+            <li>Open the root <code>apps.json</code> file and append your app's metadata to the array.</li>
+            <li>Update the <code>.github/workflows/deploy.yml</code> GitHub Actions file to include a build step for
+                your new sub-directory.</li>
+            <li>Push to <code>main</code>! The portal and sub-apps will automatically construct and deploy to GitHub
+                Pages.</li>
+        </ol>
+    </div>
+
+    <script>
+        fetch('apps.json')
+            .then(response => response.json())
+            .then(apps => {
+                const grid = document.getElementById('app-grid');
+                grid.innerHTML = ''; // clear loading
+                apps.forEach(app => {
+                    const card = document.createElement('a');
+                    card.href = app.path;
+                    card.className = 'app-card';
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <div class="app-icon">${app.icon}</div>
+                            <div class="status-badge">${app.status}</div>
+                        </div>
+                        <h2 class="app-title">${app.name}</h2>
+                        <p class="app-desc">${app.description}</p>
+                        <div class="tags">
+                            ${app.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            })
+            .catch(error => {
+                document.getElementById('loading').innerHTML = 'Error loading applications structure.';
+                console.error('Error fetching apps.json:', error);
+            });
+    </script>
 </body>
 
 </html>
