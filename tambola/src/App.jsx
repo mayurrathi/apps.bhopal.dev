@@ -13,6 +13,11 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('game');
   const [prizes, setPrizes] = useState(() => loadPrizes());
   const [firebaseReady, setFirebaseReady] = useState(null); // null=checking, true/false
+  
+  // Try to detect user language, default to en, switch to hi if Hindi detected
+  const browserLang = (typeof navigator !== 'undefined' && navigator.language) ? navigator.language.toLowerCase() : 'en';
+  const initialLang = browserLang.startsWith('hi') ? 'hi' : 'en';
+  const [appLang, setAppLang] = useState(initialLang);
 
   // Multiplayer room state — shared between App and TambolaApp (for host sync)
   const [activeRoomCode, setActiveRoomCode] = useState(null);
@@ -68,6 +73,20 @@ export default function App() {
 
   // INITIAL ROLE SELECTION SCREEN
   if (!roleAssigned) {
+    const isHindi = appLang === 'hi';
+    const text = {
+      title: "Tambola Master",
+      subtitle: isHindi ? "आज आप कैसे खेलना चाहेंगे?" : "How would you like to play today?",
+      hostTitle: isHindi ? "होस्ट बनें" : "Host a Game",
+      hostSub: isHindi ? "नंबर बोलें और बोर्ड प्रबंधित करें" : "Call numbers & manage the board",
+      multiTitle: isHindi ? "ऑनलाइन खेलें" : "Join a Room",
+      multiSub: isHindi ? "दोस्तों के साथ ऑनलाइन टिकट खेलें" : "Play tickets with friends online",
+      multiOffline: isHindi ? "ऑफ़लाइन मोड में उपलब्ध नहीं" : "Unavailable in offline mode",
+      playerTitle: isHindi ? "प्लेयर टिकट" : "Player Tickets",
+      playerSub: isHindi ? "अपने टिकटों के साथ ऑफ़लाइन खेलें" : "Play offline with your own tickets",
+      footer: "© 2025 Tambola Master Studios"
+    };
+
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 selection:bg-indigo-200">
         {/* Background blobs */}
@@ -81,8 +100,8 @@ export default function App() {
             <Grid3X3 className="w-10 h-10 text-white" />
           </div>
 
-          <h1 className="text-3xl font-black text-slate-800 mb-2">Tambola Master</h1>
-          <p className="text-slate-500 font-medium mb-8">How would you like to play today?</p>
+          <h1 className="text-3xl font-black text-slate-800 mb-2">{text.title}</h1>
+          <p className="text-slate-500 font-medium mb-8">{text.subtitle}</p>
 
           <div className="w-full flex flex-col gap-4">
             <button
@@ -94,28 +113,30 @@ export default function App() {
                 <Grid3X3 size={24} />
               </div>
               <div className="relative z-10 flex-1">
-                <h3 className="text-lg font-bold text-slate-800">Host a Game</h3>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">Call numbers & manage the board</p>
+                <h3 className="text-lg font-bold text-slate-800">{text.hostTitle}</h3>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">{text.hostSub}</p>
               </div>
               <ArrowRight className="relative z-10 text-indigo-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
             </button>
 
-            {firebaseReady !== false && (
-              <button
-                onClick={() => { setActiveTab('multi'); setRoleAssigned(true); }}
-                className="group relative w-full flex items-center p-4 bg-white border-2 border-purple-100 rounded-2xl hover:border-purple-600 hover:shadow-lg hover:shadow-purple-100 transition-all text-left overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <div className="absolute inset-0 bg-purple-50/50 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300" />
-                <div className="relative z-10 bg-purple-100 text-purple-600 p-3 rounded-xl mr-4">
-                  <Users size={24} />
+            <button
+              onClick={() => { setActiveTab('multi'); setRoleAssigned(true); }}
+              disabled={firebaseReady === false}
+              className="group relative w-full flex items-center p-4 bg-white border-2 border-purple-100 rounded-2xl hover:border-purple-600 hover:shadow-lg hover:shadow-purple-100 transition-all text-left overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:border-purple-100 disabled:hover:shadow-none"
+            >
+              <div className="absolute inset-0 bg-purple-50/50 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300" />
+              <div className="relative z-10 bg-purple-100 text-purple-600 p-3 rounded-xl mr-4">
+                <Users size={24} />
+              </div>
+              <div className="relative z-10 flex-1 flex flex-col justify-center">
+                <div className="flex items-center gap-2">
+                   <h3 className="text-lg font-bold text-slate-800">{text.multiTitle}</h3>
+                   {firebaseReady === false && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider">Offline</span>}
                 </div>
-                <div className="relative z-10 flex-1">
-                  <h3 className="text-lg font-bold text-slate-800">Join a Room</h3>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5">Play tickets with friends online</p>
-                </div>
-                <ArrowRight className="relative z-10 text-purple-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
-              </button>
-            )}
+                <p className="text-xs text-slate-500 font-medium mt-0.5">{firebaseReady === false ? text.multiOffline : text.multiSub}</p>
+              </div>
+              <ArrowRight className="relative z-10 text-purple-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
+            </button>
 
             <button
               onClick={() => { setActiveTab('tickets'); setRoleAssigned(true); }}
@@ -126,15 +147,15 @@ export default function App() {
                 <Ticket size={24} />
               </div>
               <div className="relative z-10 flex-1">
-                <h3 className="text-lg font-bold text-slate-800">Player Tickets</h3>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">Play offline with your own tickets</p>
+                <h3 className="text-lg font-bold text-slate-800">{text.playerTitle}</h3>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">{text.playerSub}</p>
               </div>
               <ArrowRight className="relative z-10 text-emerald-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
             </button>
           </div>
         </div>
 
-        <p className="mt-6 text-xs text-slate-400 font-medium">© 2025 Tambola Master Studios</p>
+        <p className="mt-6 text-xs text-slate-400 font-medium">{text.footer}</p>
       </div>
     );
   }

@@ -309,7 +309,7 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
             <main className="relative z-10 w-full max-w-6xl mx-auto p-3 sm:p-4 flex flex-col lg:flex-row gap-4 flex-1 min-h-0 lg:overflow-hidden pb-24 lg:pb-4">
 
                 {/* ── Game Board Side ── */}
-                <div className="flex-1 w-full flex flex-col bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white p-3 sm:p-5 min-h-0 lg:h-full">
+                <div className="flex-1 w-full flex flex-col bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white p-3 sm:p-5 min-h-0 lg:h-full lg:min-h-[500px]">
 
                     {/* Status Bar */}
                     <div className="flex items-center justify-between mb-3 bg-indigo-50/50 rounded-xl p-3 border border-indigo-100 shrink-0">
@@ -325,7 +325,7 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
                     </div>
 
                     {/* Board Grid - Scalable and mobile-optimized */}
-                    <div className="flex-1 flex flex-col min-h-0 container">
+                    <div className="flex-1 flex flex-col min-h-0 w-full h-full">
                         <div
                             className="grid grid-cols-10 gap-[2px] sm:gap-1 h-full w-full"
                             style={{ gridTemplateRows: `repeat(${Math.ceil(MAX_NUMBERS / 10)}, minmax(0, 1fr))` }}
@@ -340,7 +340,7 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
                 </div>
 
                 {/* ── Right Side Panel ── */}
-                <div className="w-full lg:w-96 shrink-0 flex flex-col gap-3 lg:gap-4 lg:h-full">
+                <div className="w-full lg:w-[420px] shrink-0 flex flex-col gap-3 lg:gap-4 lg:h-full">
                     {/* Controls Card */}
                     <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-3 sm:p-4 shadow-lg border border-white flex flex-col gap-2 relative z-20 shrink-0">
                         <div className="grid grid-cols-3 gap-2">
@@ -362,7 +362,7 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
                     </div>
 
                     {/* Tickets Card */}
-                    <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-4 shadow-lg border border-white flex flex-col min-h-[400px] lg:min-h-0 lg:flex-1 overflow-hidden">
+                    <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-4 shadow-lg border border-white flex flex-col min-h-[300px] lg:flex-1 overflow-hidden mt-1 lg:mt-0">
                         <div className="flex items-center justify-between mb-4 shrink-0">
                             <h3 className="font-bold text-slate-800 flex items-center gap-2">
                                 <Ticket className="text-indigo-500 w-5 h-5" /> Host Tickets
@@ -389,7 +389,7 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
                                 </button>
                             </div>
                         ) : (
-                            <div className="flex-1 flex flex-col gap-3 overflow-y-auto pr-1 pb-4">
+                            <div className="flex-1 flex flex-col gap-3 overflow-y-auto pr-1">
                                 {hostTickets.map((ticket, idx) => (
                                     <TicketCard key={idx} ticket={ticket} ticketIndex={idx} marked={calledNumbers.reduce((acc, n) => ({ ...acc, [n]: true }), {})} toggleNumber={() => { }} />
                                 ))}
