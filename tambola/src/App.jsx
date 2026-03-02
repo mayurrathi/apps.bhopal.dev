@@ -105,21 +105,21 @@ export default function App() {
           <div className="absolute top-4 right-4 flex gap-1">
             <button
               onClick={() => setAppLang('en')}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${appLang === 'en'
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${appLang === 'en'
                   ? 'bg-indigo-600 text-white shadow-md'
                   : 'bg-indigo-50/80 text-indigo-600 hover:bg-indigo-100 border border-indigo-100'
                 }`}
             >
-              🇬🇧 EN
+              English
             </button>
             <button
               onClick={() => setAppLang('hi')}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${appLang === 'hi'
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${appLang === 'hi'
                   ? 'bg-indigo-600 text-white shadow-md'
                   : 'bg-indigo-50/80 text-indigo-600 hover:bg-indigo-100 border border-indigo-100'
                 }`}
             >
-              🇮🇳 HI
+              Hindi
             </button>
           </div>
 
