@@ -26,13 +26,16 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Tambola Master" />
   <link rel="manifest" href="/tambola/manifest.json" />
+  <link rel="canonical" href="https://apps.bhopal.dev/tambola/" />
 
   <!-- Open Graph -->
   <meta property="og:title" content="Tambola Master – Auto Housie Number Caller" />
   <meta property="og:description"
     content="Host the perfect kitty party. Features Desi Hindi phrases, instant tickets, cloud sync, and auto-play." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="/tambola/brand_banner.png" />
+  <meta property="og:url" content="https://apps.bhopal.dev/tambola/" />
+  <meta property="og:image" content="https://apps.bhopal.dev/tambola/brand_banner.png" />
+  <meta name="last-modified" content="2026-03-02" />
 
   <!-- Google AdSense — Web/PWA ad monetization -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1891237722651167"
@@ -118,11 +121,43 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('[SW] Registered:', reg.scope))
+        navigator.serviceWorker.register('/tambola/sw.js', { scope: '/tambola/' })
+          .then(reg => {
+            console.log('[SW] Registered:', reg.scope);
+            // Check for updates
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+                  // New version available — show update banner
+                  const banner = document.createElement('div');
+                  banner.id = 'sw-update-banner';
+                  banner.innerHTML = '✨ New version available! <button onclick="location.reload()" style="margin-left:8px;font-weight:bold;text-decoration:underline;background:none;border:none;color:white;cursor:pointer;">Refresh</button>';
+                  banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#4338ca;color:white;padding:10px 20px;border-radius:12px;font-size:13px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);display:flex;align-items:center;';
+                  document.body.appendChild(banner);
+                }
+              });
+            });
+          })
           .catch(err => console.warn('[SW] Registration failed:', err));
       });
     }
+
+    // PWA Install Prompt (Skill 05.6)
+    let deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      // Expose globally so React components can trigger it
+      window.__pwaInstallPrompt = e;
+      window.dispatchEvent(new Event('pwa-install-available'));
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      window.__pwaInstallPrompt = null;
+      console.log('[PWA] App installed successfully');
+    });
   </script>
 </body>
 
