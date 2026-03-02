@@ -316,9 +316,9 @@ export default function App() {
                 <div className="text-xs text-slate-500 mt-1">Play with friends in a live room (requires internet).</div>
               </div>
               <div className="bg-amber-50 rounded-2xl p-4 border border-amber-100">
-                <div className="text-2xl mb-2">🔊</div>
-                <div className="font-bold text-slate-800 text-sm">20 Languages</div>
-                <div className="text-xs text-slate-500 mt-1">Hindi, English, Marathi, Tamil and more!</div>
+                <div className="text-2xl mb-2">✨</div>
+                <div className="font-bold text-slate-800 text-sm">Modern UI</div>
+                <div className="text-xs text-slate-500 mt-1">Sleek, easy to play, and fast experience.</div>
               </div>
             </div>
             <button
