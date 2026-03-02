@@ -323,8 +323,8 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
                             onChange={(e) => setLanguage(e.target.value)}
                             className="appearance-none bg-slate-100 text-slate-700 font-semibold text-sm pl-2 pr-6 py-1.5 rounded-lg outline-none cursor-pointer hover:bg-slate-200 transition-colors"
                         >
-                            <option value="en">🇬🇧 EN</option>
-                            <option value="hi">🇮🇳 HI</option>
+                            <option value="en">🇬🇧 English</option>
+                            <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
                         </select>
                         <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                     </div>

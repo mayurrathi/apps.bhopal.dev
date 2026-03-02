@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Grid3X3, Trophy, Users, Wallet, WifiOff, Ticket, PlaySquare, ArrowRight, ChevronDown, User, BarChart3 } from 'lucide-react';
+import { Grid3X3, Trophy, Users, Wallet, WifiOff, Ticket, PlaySquare, ArrowRight, ChevronDown, User, BarChart3, Info } from 'lucide-react';
 import TambolaApp from './TambolaApp.jsx';
 import WalletTab from './WalletTab.jsx';
 import TicketsTab from './TicketsTab.jsx';
 import StatsTab from './StatsTab.jsx';
+import AboutTab from './AboutTab.jsx';
 import WebAdBanner from './WebAdBanner.jsx';
 import { loadPrizes } from './prizesData.js';
 import { checkFirebaseAvailability } from './firebaseStatus.js';
@@ -69,6 +70,7 @@ export default function App() {
     { id: 'tickets', label: 'Tickets', icon: Ticket },
     { id: 'stats', label: 'Stats', icon: BarChart3 },
     ...(firebaseReady ? [{ id: 'wallet', label: 'Wallet', icon: Wallet }] : []),
+    { id: 'about', label: 'About', icon: Info },
   ];
 
   // Lazy-load MultiplayerTab only when Firebase is available
@@ -81,7 +83,10 @@ export default function App() {
     const isHindi = appLang === 'hi';
     const text = {
       title: "Tambola Master",
+      brandTag: isHindi ? "तम्बोला / हाउसी नंबर कॉलर" : "Tambola / Housie Number Caller",
       subtitle: isHindi ? "आज आप कैसे खेलना चाहेंगे?" : "How would you like to play today?",
+      namePlaceholder: isHindi ? "अपना नाम लिखें..." : "Enter your name...",
+      nameHint: isHindi ? "👆 अपना नाम बदलने के लिए टैप करें" : "👆 Tap to set your name",
       hostTitle: isHindi ? "होस्ट बनें" : "Host a Game",
       hostSub: isHindi ? "नंबर बोलें और बोर्ड प्रबंधित करें" : "Call numbers & manage the board",
       multiTitle: isHindi ? "ऑनलाइन खेलें" : "Join a Room",
@@ -101,25 +106,25 @@ export default function App() {
         </div>
 
         <div className="relative z-10 w-full max-w-md bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white flex flex-col items-center text-center animate-fade-in-up">
-          {/* Language Toggle — Small clickable buttons */}
+          {/* Language Toggle — Full language name buttons */}
           <div className="absolute top-4 right-4 flex gap-1">
             <button
               onClick={() => setAppLang('en')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${appLang === 'en'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'bg-indigo-50/80 text-indigo-600 hover:bg-indigo-100 border border-indigo-100'
+                ? 'bg-indigo-600 text-white shadow-md'
+                : 'bg-indigo-50/80 text-indigo-600 hover:bg-indigo-100 border border-indigo-100'
                 }`}
             >
-              English
+              🇬🇧 English
             </button>
             <button
               onClick={() => setAppLang('hi')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${appLang === 'hi'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'bg-indigo-50/80 text-indigo-600 hover:bg-indigo-100 border border-indigo-100'
+                ? 'bg-indigo-600 text-white shadow-md'
+                : 'bg-indigo-50/80 text-indigo-600 hover:bg-indigo-100 border border-indigo-100'
                 }`}
             >
-              Hindi
+              🇮🇳 हिन्दी (Hindi)
             </button>
           </div>
 
@@ -128,32 +133,38 @@ export default function App() {
           </div>
 
           <h1 className="text-3xl font-black text-slate-800 mb-1">{text.title}</h1>
+          <p className="text-xs font-semibold text-indigo-500/70 mb-3 tracking-wide">{text.brandTag}</p>
 
           {/* Guest Profile — inline, non-blocking */}
-          <div className="flex items-center gap-2 mb-6">
-            <span className="text-2xl">{profile.avatar}</span>
-            {editingName ? (
-              <form onSubmit={(e) => { e.preventDefault(); const p = updateNickname(tempName); setProfile(p); setEditingName(false); }} className="flex gap-1">
-                <input
-                  type="text"
-                  value={tempName}
-                  onChange={(e) => setTempName(e.target.value)}
-                  placeholder="Your name..."
-                  autoFocus
-                  className="text-sm font-bold text-slate-700 bg-indigo-50 border border-indigo-200 rounded-lg px-2 py-1 outline-none focus:ring-2 ring-indigo-400/50 w-32"
-                  maxLength={20}
-                />
-                <button type="submit" className="text-xs font-bold text-indigo-600 hover:text-indigo-800">✓</button>
-                <button type="button" onClick={() => setEditingName(false)} className="text-xs text-slate-400">✕</button>
-              </form>
-            ) : (
-              <button onClick={() => { setTempName(profile.nickname); setEditingName(true); }} className="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
-                {profile.nickname} ✏️
-              </button>
+          <div className="flex flex-col items-center gap-1 mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">{profile.avatar}</span>
+              {editingName ? (
+                <form onSubmit={(e) => { e.preventDefault(); const p = updateNickname(tempName); setProfile(p); setEditingName(false); }} className="flex gap-1">
+                  <input
+                    type="text"
+                    value={tempName}
+                    onChange={(e) => setTempName(e.target.value)}
+                    placeholder={text.namePlaceholder}
+                    autoFocus
+                    className="text-sm font-bold text-slate-700 bg-indigo-50 border border-indigo-200 rounded-lg px-3 py-1.5 outline-none focus:ring-2 ring-indigo-400/50 w-40"
+                    maxLength={20}
+                  />
+                  <button type="submit" className="text-xs font-bold text-indigo-600 hover:text-indigo-800">✓</button>
+                  <button type="button" onClick={() => setEditingName(false)} className="text-xs text-slate-400">✕</button>
+                </form>
+              ) : (
+                <button onClick={() => { setTempName(''); setEditingName(true); }} className="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors border border-dashed border-indigo-300 px-3 py-1.5 rounded-lg bg-indigo-50/50">
+                  {profile.nickname} ✏️
+                </button>
+              )}
+            </div>
+            {!editingName && (
+              <p className="text-[10px] text-slate-400 font-medium animate-pulse">{text.nameHint}</p>
             )}
           </div>
 
-          <p className="text-slate-500 font-medium mb-6 -mt-2 text-sm">{text.subtitle}</p>
+          <p className="text-slate-500 font-medium mb-6 -mt-1 text-sm">{text.subtitle}</p>
 
           <div className="w-full flex flex-col gap-4">
             <button
@@ -289,6 +300,10 @@ export default function App() {
 
         {activeTab === 'wallet' && firebaseReady && (
           <WalletTab offlineMode={false} />
+        )}
+
+        {activeTab === 'about' && (
+          <AboutTab />
         )}
       </div>
 

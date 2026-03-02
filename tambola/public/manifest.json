@@ -1,7 +1,7 @@
 {
-    "name": "Tambola Master",
+    "name": "Tambola Master – Housie Number Caller",
     "short_name": "Tambola",
-    "description": "What is the best free Tambola host app? Tambola Master features automatic 1-90 number drawing, Hindi and English natural voices, auto-daub, claim detection, and a digital prize board.",
+    "description": "The #1 free Tambola & Housie number caller app. Play the classic Indian board game online or offline. Features automatic 1-90 number drawing, Hindi & English neural voices, auto-daub, multiplayer rooms, and a digital prize board.",
     "start_url": "/tambola/",
     "scope": "/tambola/",
     "display": "standalone",
