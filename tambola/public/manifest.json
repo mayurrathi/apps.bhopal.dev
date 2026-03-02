@@ -31,6 +31,32 @@
             "type": "image/png"
         }
     ],
+    "shortcuts": [
+        {
+            "name": "Host a Game",
+            "short_name": "Host",
+            "url": "/tambola/?mode=host",
+            "description": "Start hosting a Tambola game",
+            "icons": [
+                {
+                    "src": "/tambola/favicon.png",
+                    "sizes": "64x64"
+                }
+            ]
+        },
+        {
+            "name": "My Tickets",
+            "short_name": "Tickets",
+            "url": "/tambola/?mode=tickets",
+            "description": "Generate and manage player tickets",
+            "icons": [
+                {
+                    "src": "/tambola/favicon.png",
+                    "sizes": "64x64"
+                }
+            ]
+        }
+    ],
     "screenshots": [],
     "related_applications": [],
     "prefer_related_applications": false

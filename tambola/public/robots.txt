@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# AI Bot Access (Skill 13.4 — AI SEO)
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+Sitemap: https://apps.bhopal.dev/tambola/sitemap.xml
