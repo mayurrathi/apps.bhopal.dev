@@ -29,6 +29,19 @@ export default function App() {
   const [editingName, setEditingName] = useState(false);
   const [tempName, setTempName] = useState('');
 
+  // Skill 03 — Deeplink: auto-fill room code from ?join=CODE URL param
+  const [deeplinkRoomCode, setDeeplinkRoomCode] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get('join') || ''; } catch { return ''; }
+  });
+
+  // Skill 12 — Onboarding modal (shows once via localStorage gate)
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    try { return !localStorage.getItem('tambola_onboarded'); } catch { return false; }
+  });
+
+  // Skill 16 — Daily bonus toast
+  const [showDailyBonusToast, setShowDailyBonusToast] = useState(false);
+
   // Check Firebase on mount
   useEffect(() => {
     checkFirebaseAvailability().then(async (ready) => {
@@ -60,8 +73,34 @@ export default function App() {
           }
         }
       }
+
+      // Skill 16 — Daily bonus toast: check local wallet date
+      try {
+        const today = new Date().toISOString().slice(0, 10);
+        const stored = localStorage.getItem('tambola_wallet');
+        if (stored) {
+          // Encrypted, can't read directly — check a separate simple date key
+          const lastClaim = localStorage.getItem('tambola_daily_claimed');
+          if (lastClaim !== today) {
+            setTimeout(() => setShowDailyBonusToast(true), 2000);
+          }
+        } else {
+          // New user — show after 3s
+          setTimeout(() => setShowDailyBonusToast(true), 3000);
+        }
+      } catch { /* ignore */ }
     });
   }, []);
+
+  const dismissDailyBonus = () => {
+    try { localStorage.setItem('tambola_daily_claimed', new Date().toISOString().slice(0, 10)); } catch { /* ignore */ }
+    setShowDailyBonusToast(false);
+  };
+
+  const dismissOnboarding = () => {
+    try { localStorage.setItem('tambola_onboarded', '1'); } catch { /* ignore */ }
+    setShowOnboarding(false);
+  };
 
   // Dynamic tabs: hide Multiplayer & Wallet when Firebase is unavailable
   const tabs = [
@@ -250,6 +289,64 @@ export default function App() {
   // MAIN APP VIEW
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
+
+      {/* ── Skill 12: First-Launch Onboarding Modal ─────────────── */}
+      {showOnboarding && (
+        <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 text-center animate-fade-in-up">
+            <div className="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Grid3X3 className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-black text-slate-800 mb-1">Welcome to Tambola Master!</h2>
+            <p className="text-slate-500 text-sm mb-6">Free, offline-first Housie caller. Here's how it works:</p>
+            <div className="grid grid-cols-2 gap-3 mb-6 text-left">
+              <div className="bg-indigo-50 rounded-2xl p-4 border border-indigo-100">
+                <div className="text-2xl mb-2">🎲</div>
+                <div className="font-bold text-slate-800 text-sm">Host a Game</div>
+                <div className="text-xs text-slate-500 mt-1">Call numbers for your group. Works offline!</div>
+              </div>
+              <div className="bg-purple-50 rounded-2xl p-4 border border-purple-100">
+                <div className="text-2xl mb-2">🎟️</div>
+                <div className="font-bold text-slate-800 text-sm">Get Tickets</div>
+                <div className="text-xs text-slate-500 mt-1">Generate up to 10 tickets online or offline.</div>
+              </div>
+              <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+                <div className="text-2xl mb-2">👥</div>
+                <div className="font-bold text-slate-800 text-sm">Multiplayer</div>
+                <div className="text-xs text-slate-500 mt-1">Play with friends in a live room (requires internet).</div>
+              </div>
+              <div className="bg-amber-50 rounded-2xl p-4 border border-amber-100">
+                <div className="text-2xl mb-2">🔊</div>
+                <div className="font-bold text-slate-800 text-sm">20 Languages</div>
+                <div className="text-xs text-slate-500 mt-1">Hindi, English, Marathi, Tamil and more!</div>
+              </div>
+            </div>
+            <button
+              onClick={dismissOnboarding}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition-all active:scale-95 shadow-lg shadow-indigo-200"
+            >
+              Let's Play! 🎉
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Skill 16: Daily Bonus Toast ──────────────────────────── */}
+      {showDailyBonusToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[150] animate-fade-in-up w-[calc(100%-2rem)] max-w-sm">
+          <div className="bg-gradient-to-r from-amber-400 to-orange-400 text-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-3">
+            <span className="text-2xl">🎁</span>
+            <div className="flex-1">
+              <div className="font-bold text-sm">Daily Bonus Ready!</div>
+              <div className="text-xs opacity-90">Claim your +25 tokens in the Wallet tab</div>
+            </div>
+            <button
+              onClick={dismissDailyBonus}
+              className="text-white/80 hover:text-white font-bold text-lg leading-none px-1"
+            >✕</button>
+          </div>
+        </div>
+      )}
 
       {/* Tab Bar */}
       <div className="sticky top-0 z-50 flex bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm shrink-0">

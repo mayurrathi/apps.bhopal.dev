@@ -1,11 +1,13 @@
 /**
  * RoomChat.jsx
  * Live chat panel with UGC compliance: profanity filtering + Report User button.
+ * Skill 33 (Trail of Bits Security): DOMPurify applied to all rendered message text.
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, MessageCircle, Flag, AlertTriangle } from 'lucide-react';
 import { sendMessage } from './roomService.js';
-import { sanitizeText, containsProfanity, validateDisplayName } from './profanityFilter.js';
+import { sanitizeText } from './profanityFilter.js';
+import DOMPurify from 'dompurify';
 
 export default function RoomChat({ roomCode, currentUser, messages }) {
     const [text, setText] = useState('');
@@ -102,9 +104,10 @@ export default function RoomChat({ roomCode, currentUser, messages }) {
                                 <div className={`px-3 py-1.5 rounded-2xl text-sm leading-snug ${isMe
                                     ? 'bg-indigo-600 text-white rounded-br-sm'
                                     : 'bg-slate-100 text-slate-700 rounded-bl-sm'
-                                    }`}>
-                                    {msg.text}
-                                </div>
+                                    }`}
+                                    /* Skill 33: DOMPurify prevents XSS from Firestore chat payloads */
+                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(msg.text, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }) }}
+                                />
                             </div>
                         </div>
                     );

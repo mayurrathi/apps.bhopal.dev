@@ -152,8 +152,17 @@ export default function TambolaApp({ prizes = [], onPrizesChange = () => { }, ac
         const audioPath = `${import.meta.env.BASE_URL}audio/${language}/${folder}/${num}.mp3`;
         const audio = new Audio(audioPath);
 
-        audio.play().catch(e => {
-            console.warn('MP3 failed to play:', e);
+        audio.play().catch(() => {
+            // Skill 08: India-First — graceful fallback to Web Speech API
+            // Covers offline mode and missing audio for regional languages
+            if (!speechRef.current) return;
+            const LANG_MAP = { hi: 'hi-IN', mr: 'mr-IN', bn: 'bn-IN', ta: 'ta-IN', te: 'te-IN', kn: 'kn-IN', gu: 'gu-IN', pa: 'pa-IN' };
+            const langTag = LANG_MAP[language] || 'en-IN';
+            speechRef.current.cancel();
+            const u = new SpeechSynthesisUtterance(String(num));
+            u.lang = langTag;
+            u.rate = 0.85;
+            speechRef.current.speak(u);
         });
     };
 
