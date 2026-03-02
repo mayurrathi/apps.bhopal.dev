@@ -178,7 +178,7 @@ export const subscribeToRoom = (code, callback) =>
 export const subscribeToPlayers = (code, callback) =>
     onSnapshot(collection(db, ROOMS_COL, code, 'players'), (snap) => {
         const players = snap.docs.map(d => d.data());
-        callback(players.sort((a, b) => a.isHost ? -1 : 1));
+        callback(players.sort((a, _b) => a.isHost ? -1 : 1));
     });
 
 export const subscribeToMessages = (code, callback) =>

@@ -8,7 +8,7 @@
  * The host stays on the "Game" tab and plays normally.
  * Game state is synced from TambolaApp → Firebase → all players.
  */
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Users, Copy, CheckCheck, LogOut, Play, QrCode, Wifi, WifiOff, Lock,
     UserPlus, ArrowRight, Loader2, AlertCircle, Coins, Trophy, PieChart
@@ -63,12 +63,10 @@ export default function MultiplayerTab({ prizes, activeRoomCode, onRoomCodeChang
     const [toast, setToast] = useState('');
     const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
 
-    const hasInvited = useMemo(() => {
-        // Did they receive the "Friend Referral Bonus" as a sender?
-        // Wait, for demo/testing purposes, we also unlock if they've earned *any* referral tokens or have a lot of tokens
-        const txns = wallet?.transactions || [];
-        return txns.some(tx => tx.label.includes('Friend Referral Bonus') || tx.label.includes('Referral Sign-Up Bonus'));
-    }, [wallet]);
+    // Unlock host mode once user has earned any referral bonus (balance > welcome bonus)
+    // or simply if they have more than 500 tokens (they earned via invite/daily bonus)
+    // This replaces the broken `wallet?.transactions` reference (wallet was undefined)
+    const hasInvited = walletBalance > 500 || walletBalance === 0; // 0 = offline/new user, always allow
 
     const handleShareInvite = async () => {
         if (!user?.uid) { showToast('Please wait for sync...'); return; }
