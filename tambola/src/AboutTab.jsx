@@ -11,7 +11,7 @@ export default function AboutTab() {
                     __html: JSON.stringify({
                         "@context": "https://schema.org",
                         "@type": "Organization",
-                        "name": "Mayur.bhopal.dev",
+                        "name": "Tambola Master Studios",
                         "url": "https://apps.bhopal.dev",
                         "logo": "https://apps.bhopal.dev/tambola/favicon.png",
                         "sameAs": [
@@ -23,7 +23,7 @@ export default function AboutTab() {
                         ],
                         "contactPoint": {
                             "@type": "ContactPoint",
-                            "email": "mayur@bhopal.dev",
+                            "email": "hello@apps.bhopal.dev",
                             "contactType": "customer support"
                         }
                     })
@@ -35,8 +35,8 @@ export default function AboutTab() {
                             <Code2 size={32} />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-black text-slate-800">Mayur.bhopal.dev</h2>
-                            <p className="text-slate-500 font-medium tracking-wide text-sm">Tambola Master App Creator</p>
+                            <h2 className="text-2xl font-black text-slate-800">Tambola Master Studios</h2>
+                            <p className="text-slate-500 font-medium tracking-wide text-sm">A Bhopal Dev Apps Project</p>
                         </div>
                     </div>
                     <p className="text-slate-600 leading-relaxed mb-4">
@@ -86,22 +86,17 @@ export default function AboutTab() {
                         </div>
                     </a>
 
-                    <a href="mailto:mayur@bhopal.dev" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all group">
+                    <a href="mailto:hello@apps.bhopal.dev" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all group">
                         <div className="w-10 h-10 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center group-hover:bg-white group-hover:text-indigo-600 group-hover:shadow-sm">
                             <Mail size={20} />
                         </div>
                         <div>
                             <div className="font-bold text-slate-800 group-hover:text-indigo-600">Contact Developer</div>
-                            <div className="text-xs text-slate-500">mayur@bhopal.dev</div>
+                            <div className="text-xs text-slate-500">hello@apps.bhopal.dev</div>
                         </div>
                     </a>
                 </div>
 
-                <div className="text-center pb-4">
-                    <p className="text-xs font-semibold text-slate-500 mb-1">
-                        Developed with ❤️ by <a href="https://mayur.bhopal.dev" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-800 transition-colors">mayur.bhopal.dev</a>
-                    </p>
-                </div>
             </div>
         </div>
     );

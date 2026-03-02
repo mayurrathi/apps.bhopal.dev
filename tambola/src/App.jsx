@@ -99,34 +99,35 @@ export default function App() {
 
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 selection:bg-indigo-200">
+        {/* Language Toggle — Full language name buttons (Fixed at top right to prevent overlap) */}
+        <div className="fixed top-4 right-4 flex gap-1 z-50">
+          <button
+            onClick={() => setAppLang('en')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${appLang === 'en'
+              ? 'bg-indigo-600 text-white shadow-md'
+              : 'bg-white/80 text-indigo-600 hover:bg-indigo-50 border border-indigo-200 backdrop-blur-sm'
+              }`}
+          >
+            🇬🇧 English
+          </button>
+          <button
+            onClick={() => setAppLang('hi')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${appLang === 'hi'
+              ? 'bg-indigo-600 text-white shadow-md'
+              : 'bg-white/80 text-indigo-600 hover:bg-indigo-50 border border-indigo-200 backdrop-blur-sm'
+              }`}
+          >
+            🇮🇳 हिन्दी (Hindi)
+          </button>
+        </div>
+
         {/* Background blobs */}
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden max-w-[100vw]">
           <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-300 rounded-full mix-blend-multiply blur-[80px] opacity-40 animate-blob" />
           <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-300 rounded-full mix-blend-multiply blur-[80px] opacity-40 animate-blob animation-delay-2000" />
         </div>
 
-        <div className="relative z-10 w-full max-w-md bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white flex flex-col items-center text-center animate-fade-in-up">
-          {/* Language Toggle — Full language name buttons */}
-          <div className="absolute top-4 right-4 flex gap-1">
-            <button
-              onClick={() => setAppLang('en')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${appLang === 'en'
-                ? 'bg-indigo-600 text-white shadow-md'
-                : 'bg-indigo-50/80 text-indigo-600 hover:bg-indigo-100 border border-indigo-100'
-                }`}
-            >
-              🇬🇧 English
-            </button>
-            <button
-              onClick={() => setAppLang('hi')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${appLang === 'hi'
-                ? 'bg-indigo-600 text-white shadow-md'
-                : 'bg-indigo-50/80 text-indigo-600 hover:bg-indigo-100 border border-indigo-100'
-                }`}
-            >
-              🇮🇳 हिन्दी (Hindi)
-            </button>
-          </div>
+        <div className="relative z-10 w-full max-w-md bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white flex flex-col items-center text-center animate-fade-in-up mt-8">
 
           <div className="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-2xl shadow-xl flex items-center justify-center mb-6 transform -rotate-6 mt-2">
             <Grid3X3 className="w-10 h-10 text-white" />
@@ -237,7 +238,11 @@ export default function App() {
           </div>
         </div>
 
-        <p className="mt-6 text-xs text-slate-400 font-medium">{text.footer}</p>
+        <div className="mt-6 text-center pb-4 z-20 relative">
+          <p className="text-xs font-semibold text-slate-500 mb-1">
+            Developed with ❤️ by <a href="https://mayur.bhopal.dev" className="text-indigo-600 hover:text-indigo-800 transition-colors font-bold underline">mayur.bhopal.dev</a>
+          </p>
+        </div>
       </div>
     );
   }
