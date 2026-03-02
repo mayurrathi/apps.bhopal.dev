@@ -97,8 +97,10 @@ export default function AboutTab() {
                     </a>
                 </div>
 
-                <div className="text-center">
-                    <p className="text-xs font-semibold text-slate-400">© {new Date().getFullYear()} Mayur.bhopal.dev</p>
+                <div className="text-center pb-4">
+                    <p className="text-xs font-semibold text-slate-500 mb-1">
+                        Developed with ❤️ by <a href="https://mayur.bhopal.dev" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-800 transition-colors">mayur.bhopal.dev</a>
+                    </p>
                 </div>
             </div>
         </div>
