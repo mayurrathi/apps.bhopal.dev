@@ -132,9 +132,9 @@ export default function App() {
       hostSub: isHindi ? "नंबर बोलें और बोर्ड प्रबंधित करें" : "Call numbers & manage the board",
       multiTitle: isHindi ? "ऑनलाइन खेलें" : "Join a Room",
       multiSub: isHindi ? "दोस्तों के साथ ऑनलाइन टिकट खेलें" : "Play tickets with friends online",
-      multiOffline: isHindi ? "ऑफ़लाइन मोड में उपलब्ध नहीं" : "Unavailable in offline mode",
+      multiOffline: isHindi ? "ऑफ़लाइन मोड" : "Offline Mode",
       playerTitle: isHindi ? "प्लेयर टिकट" : "Player Tickets",
-      playerSub: isHindi ? "अपने टिकटों के साथ ऑफ़लाइन खेलें" : "Play offline with your own tickets",
+      playerSub: isHindi ? "अपने टिकट जनरेट करें और खेलें" : "Generate and play with digital tickets",
       footer: "© 2025 Tambola Master Studios"
     };
 
