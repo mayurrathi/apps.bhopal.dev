@@ -75,20 +75,22 @@ export default function App() {
       }
 
       // Skill 16 — Daily bonus toast: check local wallet date
-      try {
-        const today = new Date().toISOString().slice(0, 10);
-        const stored = localStorage.getItem('tambola_wallet');
-        if (stored) {
-          // Encrypted, can't read directly — check a separate simple date key
-          const lastClaim = localStorage.getItem('tambola_daily_claimed');
-          if (lastClaim !== today) {
-            setTimeout(() => setShowDailyBonusToast(true), 2000);
+      if (ready) {
+        try {
+          const today = new Date().toISOString().slice(0, 10);
+          const stored = localStorage.getItem('tambola_wallet');
+          if (stored) {
+            // Encrypted, can't read directly — check a separate simple date key
+            const lastClaim = localStorage.getItem('tambola_daily_claimed');
+            if (lastClaim !== today) {
+              setTimeout(() => setShowDailyBonusToast(true), 2000);
+            }
+          } else {
+            // New user — show after 3s
+            setTimeout(() => setShowDailyBonusToast(true), 3000);
           }
-        } else {
-          // New user — show after 3s
-          setTimeout(() => setShowDailyBonusToast(true), 3000);
-        }
-      } catch { /* ignore */ }
+        } catch { /* ignore */ }
+      }
     });
   }, []);
 
