@@ -23,7 +23,7 @@ export default function AboutTab() {
                         ],
                         "contactPoint": {
                             "@type": "ContactPoint",
-                            "email": "hello@apps.bhopal.dev",
+                            "email": "mayur@bhopal.dev",
                             "contactType": "customer support"
                         }
                     })
@@ -40,7 +40,7 @@ export default function AboutTab() {
                         </div>
                     </div>
                     <p className="text-slate-600 leading-relaxed mb-4">
-                        Tambola Master was built by a passionate group of developers based in Bhopal, India. We created this app because we wanted a <strong>completely free, ad-unobtrusive, offline-capable PWA</strong> to host Housie and Tambola games for our own family Diwali parties.
+                        Tambola Master was built by a passionate group of developers based in Bhopal, India. We created this app as a convenient, <strong>offline-capable PWA</strong> to host Housie and Tambola games for our own family Diwali parties and have decided to share it with the world.
                     </p>
                     <div className="flex flex-wrap gap-2 mb-2">
                         <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200 flex items-center gap-1">
@@ -66,9 +66,9 @@ export default function AboutTab() {
                         <div className="text-2xl font-black text-pink-600 mb-1">100%</div>
                         <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Free Forever</div>
                     </div>
-                    <div className="bg-white p-4 rounded-xl border border-slate-200 text-center shadow-sm">
-                        <div className="text-2xl font-black text-emerald-600 mb-1">0</div>
-                        <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Tracking Pixels</div>
+                    <div className="bg-white p-4 rounded-xl border border-slate-200 text-center shadow-sm flex items-center justify-center flex-col">
+                        <div className="text-2xl font-black text-emerald-600 mb-1">Yes</div>
+                        <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Ad Supported</div>
                     </div>
                 </div>
 
@@ -86,13 +86,13 @@ export default function AboutTab() {
                         </div>
                     </a>
 
-                    <a href="mailto:hello@apps.bhopal.dev" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all group">
+                    <a href="mailto:mayur@bhopal.dev" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all group">
                         <div className="w-10 h-10 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center group-hover:bg-white group-hover:text-indigo-600 group-hover:shadow-sm">
                             <Mail size={20} />
                         </div>
                         <div>
                             <div className="font-bold text-slate-800 group-hover:text-indigo-600">Contact Developer</div>
-                            <div className="text-xs text-slate-500">hello@apps.bhopal.dev</div>
+                            <div className="text-xs text-slate-500">mayur@bhopal.dev</div>
                         </div>
                     </a>
                 </div>
