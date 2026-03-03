@@ -168,7 +168,15 @@ export default function TicketsTab() {
         setExporting(true);
         try {
             const doc = renderTicketsToPDF(tickets);
-            doc.save(`tambola-tickets-${tickets.length}.pdf`);
+            const pdfBlob = doc.output('blob');
+            const blobUrl = URL.createObjectURL(new Blob([pdfBlob], { type: 'application/pdf' }));
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = `tambola-tickets-${tickets.length}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
         } catch (e) {
             console.error('Export failed:', e);
         }
