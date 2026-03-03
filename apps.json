@@ -14,8 +14,8 @@
     },
     {
         "id": "tz-resolver",
-        "name": "Timezone Resolver",
-        "description": "Premium Offline-First Global Time Synchronizer with Automated DST Mapping and Working Hour Visuals.",
+        "name": "Chronosync Pro",
+        "description": "Elite Global Meeting Planner & Timezone Synchronizer. Professional-grade tool for remote teams and IT nomads.",
         "path": "/tz-resolver/",
         "icon": "🌐",
         "status": "Live",
