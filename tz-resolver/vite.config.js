@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'TZ Resolver: World Clock',
-        short_name: 'TZ Resolver',
+        name: 'Timezone Master: World Clock',
+        short_name: 'Timezone Master',
         description: 'Elite global meeting planner and timezone synchronizer.',
         theme_color: '#4f46e5',
         background_color: '#0f172a',

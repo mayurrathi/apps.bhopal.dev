@@ -197,7 +197,7 @@ export default function App() {
     const anchor = addMinutes(startOfDay(now), rem.offset);
     const startStr = anchor.toISOString().replace(/-|:|\.\d+/g, '');
     const endStr = addMinutes(anchor, 30).toISOString().replace(/-|:|\.\d+/g, '');
-    const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(rem.title)}&dates=${startStr}/${endStr}&details=${encodeURIComponent('Scheduled via Timezone Resolver')}&sf=true&output=xml`;
+    const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(rem.title)}&dates=${startStr}/${endStr}&details=${encodeURIComponent('Scheduled via Timezone Master')}&sf=true&output=xml`;
     window.open(url, '_blank');
   };
 
@@ -220,8 +220,8 @@ export default function App() {
               <Globe className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Timezone Resolver</h1>
-              <p className="text-[10px] text-slate-400 font-medium tracking-wider uppercase">Global Meeting Planner</p>
+              <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Timezone Master</h1>
+              <p className="text-[10px] text-slate-400 font-medium tracking-wider uppercase">Elite Global Planner</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
