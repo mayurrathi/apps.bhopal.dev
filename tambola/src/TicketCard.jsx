@@ -84,7 +84,7 @@ export default function TicketCard({ ticket, ticketIndex, marked, toggleNumber, 
                             const isBogey = !isBlank && bogeyNumbers.includes(cell);
                             const isAutoDaubed = !isBlank && autoDaub && calledNumbers.includes(cell) && marked[cell];
 
-                            let cellClass = "aspect-square flex items-center justify-center rounded-md font-bold text-sm sm:text-base select-none transition-all ";
+                            let cellClass = "aspect-square flex items-center justify-center rounded-md font-bold text-base sm:text-lg select-none transition-all ";
 
                             if (isBlank) {
                                 cellClass += "bg-slate-200/50";

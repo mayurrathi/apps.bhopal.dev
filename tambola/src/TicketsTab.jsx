@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Ticket, Trash2, Plus, Minus, CheckCircle2, Bot, Download, Share2 } from 'lucide-react';
+import { Ticket, Trash2, Plus, Minus, CheckCircle2, Bot, FileDown, Share2 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 import { generateTicket } from './ticketGenerator.js';
 import TicketCard from './TicketCard.jsx';
 import { logEvent, EVENT } from './gameLog.js';
@@ -9,124 +10,85 @@ const LOCAL_MARKS_KEY = 'tambola_my_marks';
 const AUTO_DAUB_KEY = 'tambola_auto_daub';
 const CALLED_KEY = 'tambola_called_numbers';
 
-/* ────────────────────── Canvas Renderer ──────────────────────
-   Draws all tickets onto a canvas and returns a Blob (PNG).
-   This is used for both Export PDF (download) and Share. */
-function renderTicketsToCanvas(tickets) {
-    const TICKET_W = 540;
-    const TICKET_H = 200;
-    const PAD = 30;
-    const GAP = 20;
+/* ────────────────────── PDF Renderer ──────────────────────
+   Draws all tickets into a real multi-page PDF using jsPDF.
+   Returns the jsPDF doc instance. */
+function renderTicketsToPDF(tickets) {
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const PAGE_W = 210; // A4 width in mm
+    const MARGIN = 15;
+    const TICKET_W = PAGE_W - MARGIN * 2; // 180mm
     const COLS = 9;
     const ROWS = 3;
-
-    const totalH = PAD + tickets.length * (TICKET_H + GAP) + PAD + 40; // +40 for footer
-    const totalW = TICKET_W + PAD * 2;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = totalW * 2; // 2x for Retina
-    canvas.height = totalH * 2;
-    const ctx = canvas.getContext('2d');
-    ctx.scale(2, 2);
-
-    // Background
-    ctx.fillStyle = '#F8FAFC';
-    ctx.fillRect(0, 0, totalW, totalH);
+    const CELL_W = TICKET_W / COLS;
+    const CELL_H = 12;
+    const HEADER_H = 8;
+    const TICKET_H = HEADER_H + ROWS * CELL_H;
+    const GAP = 10;
+    const TICKETS_PER_PAGE = Math.floor((297 - MARGIN * 2 + GAP) / (TICKET_H + GAP)); // ~6 per A4
 
     tickets.forEach((ticket, idx) => {
-        const x0 = PAD;
-        const y0 = PAD + idx * (TICKET_H + GAP);
-        const cellW = TICKET_W / COLS;
-        const cellH = TICKET_H / ROWS;
+        const pageIdx = Math.floor(idx / TICKETS_PER_PAGE);
+        const posOnPage = idx % TICKETS_PER_PAGE;
+        if (idx > 0 && posOnPage === 0) doc.addPage();
 
-        // Card shadow + background
-        ctx.fillStyle = '#FFFFFF';
-        ctx.shadowColor = 'rgba(0,0,0,0.08)';
-        ctx.shadowBlur = 8;
-        ctx.shadowOffsetY = 2;
-        roundRect(ctx, x0, y0, TICKET_W, TICKET_H, 12, true, false);
-        ctx.shadowColor = 'transparent';
+        const x0 = MARGIN;
+        const y0 = MARGIN + posOnPage * (TICKET_H + GAP);
 
         // Header bar
-        ctx.fillStyle = '#4F46E5';
-        roundRectTop(ctx, x0, y0, TICKET_W, 28, 12);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 11px Inter, sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText(`TAMBOLA TICKET`, x0 + 12, y0 + 18);
-        ctx.textAlign = 'right';
-        ctx.fillText(`#${idx + 1}`, x0 + TICKET_W - 12, y0 + 18);
-        ctx.textAlign = 'left';
+        doc.setFillColor(79, 70, 229); // indigo-600
+        doc.rect(x0, y0, TICKET_W, HEADER_H, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'bold');
+        doc.text('TAMBOLA TICKET', x0 + 3, y0 + 5.5);
+        doc.text(`#${idx + 1}`, x0 + TICKET_W - 3, y0 + 5.5, { align: 'right' });
 
-        const gridY = y0 + 28;
-        const gridH = TICKET_H - 28;
-        const gCellH = gridH / ROWS;
-
+        // Grid
+        const gridY = y0 + HEADER_H;
         ticket.forEach((row, r) => {
             row.forEach((cell, c) => {
-                const cx = x0 + c * cellW;
-                const cy = gridY + r * gCellH;
+                const cx = x0 + c * CELL_W;
+                const cy = gridY + r * CELL_H;
 
-                // Cell background
+                // Cell fill
                 if (cell === 0) {
-                    ctx.fillStyle = '#F1F5F9';
+                    doc.setFillColor(241, 245, 249); // slate-100
                 } else {
-                    ctx.fillStyle = '#FFFFFF';
+                    doc.setFillColor(255, 255, 255);
                 }
-                ctx.fillRect(cx + 1, cy + 1, cellW - 2, gCellH - 2);
+                doc.rect(cx, cy, CELL_W, CELL_H, 'F');
 
                 // Cell border
-                ctx.strokeStyle = '#E2E8F0';
-                ctx.lineWidth = 0.5;
-                ctx.strokeRect(cx + 1, cy + 1, cellW - 2, gCellH - 2);
+                doc.setDrawColor(226, 232, 240); // slate-200
+                doc.setLineWidth(0.2);
+                doc.rect(cx, cy, CELL_W, CELL_H, 'S');
 
-                // Number
+                // Number text
                 if (cell !== 0) {
-                    ctx.fillStyle = '#1E293B';
-                    ctx.font = 'bold 18px Inter, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(String(cell), cx + cellW / 2, cy + gCellH / 2 + 1);
-                    ctx.textAlign = 'left';
-                    ctx.textBaseline = 'alphabetic';
+                    doc.setTextColor(30, 41, 59); // slate-800
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(String(cell), cx + CELL_W / 2, cy + CELL_H / 2 + 1.5, { align: 'center' });
                 }
             });
         });
+
+        // Outer border for the entire ticket
+        doc.setDrawColor(100, 116, 139); // slate-500
+        doc.setLineWidth(0.4);
+        doc.rect(x0, y0, TICKET_W, TICKET_H, 'S');
     });
 
-    // Footer branding
-    ctx.fillStyle = '#94A3B8';
-    ctx.font = '500 11px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Tambola Master · apps.bhopal.dev/tambola', totalW / 2, totalH - 18);
-    ctx.textAlign = 'left';
+    // Footer on last page
+    const lastPage = doc.internal.getNumberOfPages();
+    doc.setPage(lastPage);
+    doc.setTextColor(148, 163, 184);
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Tambola Master \u00B7 apps.bhopal.dev/tambola', PAGE_W / 2, 290, { align: 'center' });
 
-    return new Promise(resolve => {
-        canvas.toBlob(blob => resolve(blob), 'image/png');
-    });
-}
-
-function roundRect(ctx, x, y, w, h, r, fill, stroke) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-    if (fill) ctx.fill();
-    if (stroke) ctx.stroke();
-}
-
-function roundRectTop(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.lineTo(x + w, y + h);
-    ctx.lineTo(x, y + h);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-    ctx.fill();
+    return doc;
 }
 
 export default function TicketsTab() {
@@ -200,33 +162,27 @@ export default function TicketsTab() {
         setMarked(prev => ({ ...prev, [num]: !prev[num] }));
     };
 
-    /* ── Export to PDF (downloads as PNG image) ── */
-    const handleExportPDF = async () => {
+    /* ── Export to PDF ── */
+    const handleExportPDF = () => {
         if (tickets.length === 0) return;
         setExporting(true);
         try {
-            const blob = await renderTicketsToCanvas(tickets);
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `tambola-tickets-${tickets.length}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            const doc = renderTicketsToPDF(tickets);
+            doc.save(`tambola-tickets-${tickets.length}.pdf`);
         } catch (e) {
             console.error('Export failed:', e);
         }
         setExporting(false);
     };
 
-    /* ── Share via Web Share API (native mobile sharing) ── */
+    /* ── Share via Web Share API (shares PDF) ── */
     const handleShare = async () => {
         if (tickets.length === 0) return;
         setExporting(true);
         try {
-            const blob = await renderTicketsToCanvas(tickets);
-            const file = new File([blob], `tambola-tickets-${tickets.length}.png`, { type: 'image/png' });
+            const doc = renderTicketsToPDF(tickets);
+            const pdfBlob = doc.output('blob');
+            const file = new File([pdfBlob], `tambola-tickets-${tickets.length}.pdf`, { type: 'application/pdf' });
 
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 await navigator.share({
@@ -235,20 +191,17 @@ export default function TicketsTab() {
                     files: [file],
                 });
             } else if (navigator.share) {
-                // Fallback: share without file (for browsers that don't support file sharing)
                 await navigator.share({
                     title: 'Tambola Master Tickets',
                     text: `I just generated ${tickets.length} Tambola tickets! Play now at apps.bhopal.dev/tambola`,
                     url: 'https://apps.bhopal.dev/tambola/',
                 });
             } else {
-                // Desktop fallback: just download
                 handleExportPDF();
             }
         } catch (e) {
             if (e.name !== 'AbortError') {
                 console.error('Share failed:', e);
-                // Fallback to download
                 handleExportPDF();
             }
         }
@@ -272,7 +225,7 @@ export default function TicketsTab() {
                         Number of Tickets
                     </label>
 
-                    <div className="flex items-center justify-center gap-6 mb-8">
+                    <div className="flex items-center justify-center gap-4 mb-8">
                         <button
                             onClick={() => setAmount(Math.max(1, amount - 1))}
                             className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-indigo-600 transition-colors border border-slate-200 active:scale-95"
@@ -280,12 +233,21 @@ export default function TicketsTab() {
                             <Minus size={20} />
                         </button>
 
-                        <div className="text-5xl font-black text-slate-800 tabular-nums w-16 text-center">
-                            {amount}
-                        </div>
+                        <input
+                            type="number"
+                            min={1}
+                            max={50}
+                            value={amount}
+                            onChange={(e) => {
+                                const v = parseInt(e.target.value, 10);
+                                if (!isNaN(v)) setAmount(Math.max(1, Math.min(50, v)));
+                                else if (e.target.value === '') setAmount(1);
+                            }}
+                            className="w-20 text-center text-4xl font-black text-slate-800 tabular-nums bg-slate-50 border border-slate-200 rounded-xl py-2 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
 
                         <button
-                            onClick={() => setAmount(Math.min(10, amount + 1))}
+                            onClick={() => setAmount(Math.min(50, amount + 1))}
                             className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-indigo-600 transition-colors border border-slate-200 active:scale-95"
                         >
                             <Plus size={20} />
@@ -304,7 +266,7 @@ export default function TicketsTab() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-24">
+        <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-24">
             {/* Header / Action Bar */}
             <div className="flex items-center justify-between mb-4 bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-200 sticky top-[72px] z-40 bg-white/90 backdrop-blur-md">
                 <div className="flex flex-col">
@@ -343,8 +305,8 @@ export default function TicketsTab() {
                     disabled={exporting}
                     className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 active:scale-95 transition-all disabled:opacity-60"
                 >
-                    <Download size={18} />
-                    {exporting ? 'Exporting…' : 'Export to PDF'}
+                    <FileDown size={18} />
+                    {exporting ? 'Exporting…' : 'Export PDF'}
                 </button>
                 <button
                     onClick={handleShare}
