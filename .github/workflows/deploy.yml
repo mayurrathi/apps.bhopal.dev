@@ -20,24 +20,30 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install and Build Tambola
+      - name: Build and Prepare All Apps
         run: |
-          cd tambola
-          npm ci
-          npm run build
-
-      - name: Install and Build TZ Resolver
-        run: |
-          cd tz-resolver
-          npm ci
-          npm run build
-
-      - name: Prepare Deployment Directory
-        run: |
-          mkdir -p deployment_prep/tambola
-          mkdir -p deployment_prep/tz-resolver
-          cp -r tambola/dist/* deployment_prep/tambola/
-          cp -r tz-resolver/dist/* deployment_prep/tz-resolver/
+          mkdir -p deployment_prep
+          # Iterate over each app defined in apps.json
+          # We use jq to parse the json and get the path (removing leading/trailing slashes)
+          for app_id in $(jq -r '.[].id' apps.json); do
+            app_path=$(jq -r ".[] | select(.id==\"$app_id\") | .path" apps.json | sed 's/\///g')
+            echo "Processing App: $app_id in directory: $app_path"
+            
+            if [ -d "$app_path" ] && [ -f "$app_path/package.json" ]; then
+              echo "Building $app_id..."
+              cd "$app_path"
+              npm ci
+              npm run build
+              cd ..
+              
+              mkdir -p "deployment_prep/$app_path"
+              cp -r "$app_path/dist/"* "deployment_prep/$app_path/"
+            else
+              echo "Warning: Directory $app_path not found or missing package.json. Skipping."
+            fi
+          done
+          
+          # Copy root files
           cp index.html deployment_prep/
           cp apps.json deployment_prep/
           if [ -f "CNAME" ]; then cp CNAME deployment_prep/; fi
