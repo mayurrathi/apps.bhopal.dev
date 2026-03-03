@@ -65,6 +65,8 @@ export default function App() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [copying, setCopying] = useState(false);
+  const [use24Hour, setUse24Hour] = useState(() => localStorage.getItem('tz-master-24h') === 'true');
+  const [showSettings, setShowSettings] = useState(false);
 
   // The central interactive time (offset in minutes from start of today UTC)
   const [selectedMinutesOffset, setSelectedMinutesOffset] = useState(() => {
@@ -80,6 +82,9 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('tz-resolver-reminders', JSON.stringify(reminders));
   }, [reminders]);
+  useEffect(() => {
+    localStorage.setItem('tz-master-24h', use24Hour);
+  }, [use24Hour]);
 
   const removeZone = (idToRemove) => {
     setZones(prev => prev.filter(z => z.id !== idToRemove));
@@ -136,7 +141,7 @@ export default function App() {
         timeZone,
         hour: '2-digit',
         minute: '2-digit',
-        hour12: true,
+        hour12: !use24Hour,
         weekday: 'short',
         month: 'short',
         day: 'numeric',
@@ -146,9 +151,10 @@ export default function App() {
       const getPart = (type) => parts.find(p => p.type === type)?.value || '';
 
       const hour24 = parseInt(new Intl.DateTimeFormat('en-US', { timeZone, hour: 'numeric', hour12: false }).format(date), 10);
+      const timeStr = !use24Hour ? `${getPart('hour')}:${getPart('minute')}` : `${hour24.toString().padStart(2, '0')}:${getPart('minute')}`;
 
       return {
-        time: `${getPart('hour')}:${getPart('minute')}`,
+        time: timeStr,
         amPm: getPart('dayPeriod'),
         date: `${getPart('weekday')}, ${getPart('month')} ${getPart('day')}`,
         tzShort: getPart('timeZoneName'),
@@ -225,10 +231,11 @@ export default function App() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={copyMeetingSummary} className="w-10 h-10 rounded-full glass flex items-center justify-center text-slate-300 hover:text-primary transition-all active:scale-90">
+            <button onClick={copyMeetingSummary} className="w-10 h-10 rounded-full glass flex items-center justify-center text-slate-300 hover:text-primary transition-all active:scale-90 relative">
               {copying ? <Check className="w-5 h-5 text-emerald-500" /> : <Copy className="w-5 h-5" />}
+              {copying && <span className="absolute -bottom-8 bg-emerald-500 text-white text-[8px] px-2 py-1 rounded font-black whitespace-nowrap animate-in fade-in slide-in-from-top-1">COPIED</span>}
             </button>
-            <button className="w-10 h-10 rounded-full glass flex items-center justify-center text-slate-300 hover:text-white transition-all active:scale-90 opacity-50 cursor-not-allowed">
+            <button onClick={() => setShowSettings(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center text-slate-300 hover:text-white transition-all active:scale-90">
               <Settings className="w-5 h-5" />
             </button>
           </div>
@@ -436,6 +443,42 @@ export default function App() {
           </button>
         </nav>
       </main>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" onClick={() => setShowSettings(false)} />
+          <div className="w-full max-w-sm glass rounded-[2.5rem] p-8 relative animate-in zoom-in-95 duration-200 shadow-2xl border-white/20">
+            <h2 className="text-xl font-black text-white mb-6 flex items-center gap-3">
+              <Settings className="w-6 h-6 text-primary" /> Preferences
+            </h2>
+
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-white">24-Hour Format</p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Toggle time display style</p>
+                </div>
+                <button
+                  onClick={() => setUse24Hour(!use24Hour)}
+                  className={`w-14 h-8 rounded-full p-1 transition-all ${use24Hour ? 'bg-primary shadow-[0_0_15px_rgba(79,70,229,0.3)]' : 'bg-slate-800'}`}
+                >
+                  <div className={`w-6 h-6 rounded-full bg-white transition-all ${use24Hour ? 'translate-x-6' : 'translate-x-0'} shadow-md`} />
+                </button>
+              </div>
+
+              <div className="pt-6 border-t border-white/5">
+                <button
+                  onClick={() => setShowSettings(false)}
+                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-black py-4 rounded-2xl transition-all active:scale-95 text-xs tracking-widest uppercase"
+                >
+                  Save & Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
