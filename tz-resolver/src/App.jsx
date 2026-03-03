@@ -191,7 +191,7 @@ export default function App() {
     const anchor = addMinutes(startOfDay(now), rem.offset);
     const startStr = anchor.toISOString().replace(/-|:|\.\d+/g, '');
     const endStr = addMinutes(anchor, 30).toISOString().replace(/-|:|\.\d+/g, '');
-    const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(rem.title)}&dates=${startStr}/${endStr}&details=${encodeURIComponent('Created via TZ Resolver Pro')}&sf=true&output=xml`;
+    const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(rem.title)}&dates=${startStr}/${endStr}&details=${encodeURIComponent('Scheduled via Chronosync Pro')}&sf=true&output=xml`;
     window.open(url, '_blank');
   };
 
@@ -214,10 +214,8 @@ export default function App() {
               <Globe className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-primary-light to-slate-400">
-                TZ RESOLVER PRO
-              </h1>
-              <p className="text-[10px] text-slate-500 font-bold tracking-[0.2em] uppercase">Enterprise Workspace</p>
+              <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Chronosync Pro</h1>
+              <p className="text-[10px] text-slate-400 font-medium tracking-wider uppercase">Global Meeting Orchestrator</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -241,6 +239,9 @@ export default function App() {
                   <h2 className="text-lg font-bold flex items-center gap-2">
                     <Clock className="w-5 h-5 text-primary" /> Synchronizer
                   </h2>
+                  <p className="sr-only">
+                    The Chronosync Pro Synchronizer is an interactive time-anchoring tool for global teams. It uses a draggable UTC offset slider to resolve local times across multiple geographic regions simultaneously. This feature handles international daylight savings time patterns automatically without manual calculation.
+                  </p>
                   <div className="font-mono text-sm bg-slate-800/80 px-4 py-2 rounded-2xl text-primary-light border border-white/5 shadow-inner">
                     {Math.floor(selectedMinutesOffset / 60).toString().padStart(2, '0')}:{(selectedMinutesOffset % 60).toString().padStart(2, '0')} <span className="text-[10px] text-slate-500 font-sans font-black ml-1">UTC</span>
                   </div>
@@ -262,6 +263,9 @@ export default function App() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between px-2">
                   <h3 className="text-xs font-black text-slate-500 tracking-[0.3em] uppercase">Active Pipelines</h3>
+                  <p className="sr-only">
+                    Active Pipelines represent the real-time timezone nodes selected by the user. Each pipeline shows the specific localized date and time based on the active synchronizer anchor. Working hour visualizations (green indicators) highlight colleagues available between 08:00 and 18:00 in their respective local timezones.
+                  </p>
                   <button onClick={() => setActiveTab('search')} className="bg-primary/20 text-primary hover:bg-primary/30 px-5 py-2 rounded-full text-xs font-black tracking-widest transition-all active:scale-95 shadow-lg shadow-primary/10">
                     + CONNECT CITY
                   </button>
@@ -366,6 +370,9 @@ export default function App() {
             <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center justify-between px-2">
                 <h2 className="text-xl font-black text-white flex items-center gap-3"><Bell className="w-6 h-6 text-emerald-500" /> Pipeline Syncs</h2>
+                <p className="sr-only">
+                  Pipeline Syncs are persistent meeting reminders scheduled via the Chronosync Pro interface. These reminders store the specific UTC offset anchor and provide one-click integration with Google Calendar, allowing IT professionals to automate cross-border meeting scheduling with absolute precision.
+                </p>
                 <span className="text-[10px] font-black bg-slate-800 text-slate-400 px-3 py-1 rounded-full uppercase tracking-tighter">{reminders.length} Anchored</span>
               </div>
 

@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /tz-resolver/
+Allow: /tambola/
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+Sitemap: https://apps.bhopal.dev/sitemap.xml
