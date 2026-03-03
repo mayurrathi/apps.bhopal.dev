@@ -349,10 +349,11 @@ export default function App() {
                     </div>
                     <button
                       onClick={resetToCurrentTime}
-                      className="p-2 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-slate-400 hover:text-white group"
+                      className="group flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all active:scale-95 border border-white/10"
                       title="Reset to Current Time"
                     >
-                      <Clock className="w-4 h-4 group-active:rotate-12 transition-transform shadow-lg" />
+                      <Clock className="w-4 h-4 group-active:rotate-12 transition-transform" />
+                      <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Reset</span>
                     </button>
                   </div>
                 </div>
