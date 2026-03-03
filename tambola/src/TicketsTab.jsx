@@ -254,7 +254,6 @@ function PlayModule() {
     const [marked, setMarked] = useState({});
     const [amount, setAmount] = useState(1);
     const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-    const [exporting, setExporting] = useState(false);
     const [autoDaub, setAutoDaub] = useState(() => {
         try { return JSON.parse(localStorage.getItem(AUTO_DAUB_KEY)) || false; } catch { return false; }
     });
@@ -317,33 +316,6 @@ function PlayModule() {
         setMarked(prev => ({ ...prev, [num]: !prev[num] }));
     };
 
-    const handleExportPDF = () => {
-        if (tickets.length === 0) return;
-        setExporting(true);
-        try {
-            const doc = renderTicketsToPDF(tickets);
-            downloadPDF(doc, tickets.length);
-        } catch (e) {
-            console.error('Export failed:', e);
-        }
-        setExporting(false);
-    };
-
-    const handleShare = async () => {
-        if (tickets.length === 0) return;
-        setExporting(true);
-        try {
-            const doc = renderTicketsToPDF(tickets);
-            await sharePDF(doc, tickets.length);
-        } catch (e) {
-            if (e.name !== 'AbortError') {
-                console.error('Share failed:', e);
-                handleExportPDF();
-            }
-        }
-        setExporting(false);
-    };
-
     if (tickets.length === 0) {
         return (
             <div className="max-w-md mx-auto p-4 sm:p-6 pt-8 flex flex-col items-center text-center animate-fade-in-up">
@@ -402,7 +374,7 @@ function PlayModule() {
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-24">
+        <div className="w-full max-w-4xl mx-auto p-2 sm:p-4 pb-24">
             {/* Header / Action Bar */}
             <div className="flex items-center justify-between mb-4 bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-200 sticky top-[72px] z-40 bg-white/90 backdrop-blur-md">
                 <div className="flex flex-col">
@@ -430,26 +402,6 @@ function PlayModule() {
                         <Trash2 size={16} /> <span className="hidden sm:inline">Cancel All</span>
                     </button>
                 </div>
-            </div>
-
-            {/* Export & Share Bar */}
-            <div className="flex gap-3 mb-4">
-                <button
-                    onClick={handleExportPDF}
-                    disabled={exporting}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 active:scale-95 transition-all disabled:opacity-60"
-                >
-                    <FileDown size={18} />
-                    {exporting ? 'Exporting…' : 'Export PDF'}
-                </button>
-                <button
-                    onClick={handleShare}
-                    disabled={exporting}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-purple-200 active:scale-95 transition-all disabled:opacity-60"
-                >
-                    <Share2 size={18} />
-                    {exporting ? 'Sharing…' : 'Share Tickets'}
-                </button>
             </div>
 
             {/* Auto-Daub indicator */}
@@ -520,8 +472,8 @@ export default function TicketsTab() {
                     <button
                         onClick={() => setTicketMode('play')}
                         className={`flex-1 py-2.5 font-bold text-sm rounded-lg transition-all flex items-center justify-center gap-2 ${ticketMode === 'play'
-                                ? 'bg-white text-indigo-700 shadow-sm'
-                                : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                            ? 'bg-white text-indigo-700 shadow-sm'
+                            : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
                             }`}
                     >
                         <Gamepad2 size={16} /> Play
@@ -529,8 +481,8 @@ export default function TicketsTab() {
                     <button
                         onClick={() => setTicketMode('print')}
                         className={`flex-1 py-2.5 font-bold text-sm rounded-lg transition-all flex items-center justify-center gap-2 ${ticketMode === 'print'
-                                ? 'bg-white text-emerald-700 shadow-sm'
-                                : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                            ? 'bg-white text-emerald-700 shadow-sm'
+                            : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
                             }`}
                     >
                         <Printer size={16} /> Print & Share
