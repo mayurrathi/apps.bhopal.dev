@@ -155,7 +155,8 @@ export default function App() {
 
   const addReminder = (zone) => {
     const now = new Date();
-    const anchor = addMinutes(startOfDay(now), selectedMinutesOffset);
+    const utcStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const anchor = addMinutes(utcStart, selectedMinutesOffset);
     const parts = getZonedParts(anchor, zone.tz);
     const newReminder = {
       id: Date.now(),
@@ -173,7 +174,8 @@ export default function App() {
 
   const copyMeetingSummary = () => {
     const now = new Date();
-    const anchor = addMinutes(startOfDay(now), selectedMinutesOffset);
+    const utcStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const anchor = addMinutes(utcStart, selectedMinutesOffset);
     let summary = `📅 Meeting Schedule Summary:\n`;
     zones.forEach(z => {
       const parts = getZonedParts(anchor, z.tz);
@@ -273,7 +275,8 @@ export default function App() {
                 ) : (
                   zones.map(zone => {
                     const now = new Date();
-                    const anchor = addMinutes(startOfDay(now), selectedMinutesOffset);
+                    const utcStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+                    const anchor = addMinutes(utcStart, selectedMinutesOffset);
                     const parts = getZonedParts(anchor, zone.tz);
                     const isWorking = parts.hour24 >= 8 && parts.hour24 <= 18;
 
