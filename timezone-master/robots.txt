@@ -1,7 +1,5 @@
 User-agent: *
 Allow: /
-Allow: /tz-resolver/
-Allow: /tambola/
 
 User-agent: GPTBot
 Allow: /
@@ -12,4 +10,4 @@ Allow: /
 User-agent: Claude-Web
 Allow: /
 
-Sitemap: https://apps.bhopal.dev/sitemap.xml
+Sitemap: https://apps.bhopal.dev/timezone-master/sitemap.xml

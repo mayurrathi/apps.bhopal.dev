@@ -13,10 +13,10 @@
         ]
     },
     {
-        "id": "tz-resolver",
+        "id": "timezone-master",
         "name": "Timezone Master",
         "description": "Elite Global Meeting Planner & Timezone Synchronizer. Professional-grade tool for remote teams and IT nomads.",
-        "path": "/tz-resolver/",
+        "path": "/timezone-master/",
         "icon": "🌐",
         "status": "Live",
         "tags": [
