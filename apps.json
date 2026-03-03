@@ -11,5 +11,18 @@
             "Firebase",
             "Realtime"
         ]
+    },
+    {
+        "id": "tz-resolver",
+        "name": "Timezone Resolver",
+        "description": "Premium Offline-First Global Time Synchronizer with Automated DST Mapping and Working Hour Visuals.",
+        "path": "/tz-resolver/",
+        "icon": "🌐",
+        "status": "Live",
+        "tags": [
+            "PWA",
+            "Offline-First",
+            "Design"
+        ]
     }
 ]
