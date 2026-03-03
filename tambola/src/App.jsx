@@ -284,6 +284,11 @@ export default function App() {
             Developed with ❤️ by <a href="https://mayur.bhopal.dev" className="text-indigo-600 hover:text-indigo-800 transition-colors font-bold underline">mayur.bhopal.dev</a>
           </p>
         </div>
+
+        {/* AdSense Banner — Monetize role-selection screen */}
+        <div className="w-full absolute bottom-0 left-0">
+          <WebAdBanner className="bg-slate-50/80 backdrop-blur-sm pb-2 pt-2 border-t border-slate-200/50" />
+        </div>
       </div>
     );
   }
