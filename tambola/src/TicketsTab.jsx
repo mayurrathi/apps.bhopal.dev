@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Ticket, Trash2, Plus, Minus, CheckCircle2, Bot, FileDown, Share2 } from 'lucide-react';
+import { Ticket, Trash2, Plus, Minus, CheckCircle2, Bot, FileDown, Share2, Printer, Gamepad2, Info } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { generateTicket } from './ticketGenerator.js';
 import TicketCard from './TicketCard.jsx';
@@ -15,9 +15,9 @@ const CALLED_KEY = 'tambola_called_numbers';
    Returns the jsPDF doc instance. */
 function renderTicketsToPDF(tickets) {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const PAGE_W = 210; // A4 width in mm
+    const PAGE_W = 210;
     const MARGIN = 15;
-    const TICKET_W = PAGE_W - MARGIN * 2; // 180mm
+    const TICKET_W = PAGE_W - MARGIN * 2;
     const COLS = 9;
     const ROWS = 3;
     const CELL_W = TICKET_W / COLS;
@@ -25,18 +25,16 @@ function renderTicketsToPDF(tickets) {
     const HEADER_H = 8;
     const TICKET_H = HEADER_H + ROWS * CELL_H;
     const GAP = 10;
-    const TICKETS_PER_PAGE = Math.floor((297 - MARGIN * 2 + GAP) / (TICKET_H + GAP)); // ~6 per A4
+    const TICKETS_PER_PAGE = Math.floor((297 - MARGIN * 2 + GAP) / (TICKET_H + GAP));
 
     tickets.forEach((ticket, idx) => {
-        const pageIdx = Math.floor(idx / TICKETS_PER_PAGE);
         const posOnPage = idx % TICKETS_PER_PAGE;
         if (idx > 0 && posOnPage === 0) doc.addPage();
 
         const x0 = MARGIN;
         const y0 = MARGIN + posOnPage * (TICKET_H + GAP);
 
-        // Header bar
-        doc.setFillColor(79, 70, 229); // indigo-600
+        doc.setFillColor(79, 70, 229);
         doc.rect(x0, y0, TICKET_W, HEADER_H, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(8);
@@ -44,43 +42,33 @@ function renderTicketsToPDF(tickets) {
         doc.text('TAMBOLA TICKET', x0 + 3, y0 + 5.5);
         doc.text(`#${idx + 1}`, x0 + TICKET_W - 3, y0 + 5.5, { align: 'right' });
 
-        // Grid
         const gridY = y0 + HEADER_H;
         ticket.forEach((row, r) => {
             row.forEach((cell, c) => {
                 const cx = x0 + c * CELL_W;
                 const cy = gridY + r * CELL_H;
-
-                // Cell fill
                 if (cell === 0) {
-                    doc.setFillColor(241, 245, 249); // slate-100
+                    doc.setFillColor(241, 245, 249);
                 } else {
                     doc.setFillColor(255, 255, 255);
                 }
                 doc.rect(cx, cy, CELL_W, CELL_H, 'F');
-
-                // Cell border
-                doc.setDrawColor(226, 232, 240); // slate-200
+                doc.setDrawColor(226, 232, 240);
                 doc.setLineWidth(0.2);
                 doc.rect(cx, cy, CELL_W, CELL_H, 'S');
-
-                // Number text
                 if (cell !== 0) {
-                    doc.setTextColor(30, 41, 59); // slate-800
+                    doc.setTextColor(30, 41, 59);
                     doc.setFontSize(12);
                     doc.setFont('helvetica', 'bold');
                     doc.text(String(cell), cx + CELL_W / 2, cy + CELL_H / 2 + 1.5, { align: 'center' });
                 }
             });
         });
-
-        // Outer border for the entire ticket
-        doc.setDrawColor(100, 116, 139); // slate-500
+        doc.setDrawColor(100, 116, 139);
         doc.setLineWidth(0.4);
         doc.rect(x0, y0, TICKET_W, TICKET_H, 'S');
     });
 
-    // Footer on last page
     const lastPage = doc.internal.getNumberOfPages();
     doc.setPage(lastPage);
     doc.setTextColor(148, 163, 184);
@@ -91,7 +79,177 @@ function renderTicketsToPDF(tickets) {
     return doc;
 }
 
-export default function TicketsTab() {
+/* ── Helper: download a PDF blob ── */
+function downloadPDF(doc, count) {
+    const pdfBlob = doc.output('blob');
+    const blobUrl = URL.createObjectURL(new Blob([pdfBlob], { type: 'application/pdf' }));
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = `tambola-tickets-${count}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+}
+
+/* ── Helper: share a PDF blob ── */
+async function sharePDF(doc, count) {
+    const pdfBlob = doc.output('blob');
+    const file = new File([pdfBlob], `tambola-tickets-${count}.pdf`, { type: 'application/pdf' });
+
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+            title: 'Tambola Master Tickets',
+            text: `Here are ${count} Tambola tickets! Play now at apps.bhopal.dev/tambola`,
+            files: [file],
+        });
+    } else if (navigator.share) {
+        await navigator.share({
+            title: 'Tambola Master Tickets',
+            text: `I just generated ${count} Tambola tickets! Play now at apps.bhopal.dev/tambola`,
+            url: 'https://apps.bhopal.dev/tambola/',
+        });
+    } else {
+        downloadPDF(doc, count);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PRINT & SHARE MODULE
+// ═══════════════════════════════════════════════════════════════
+function PrintModule() {
+    const [printAmount, setPrintAmount] = useState(10);
+    const [exporting, setExporting] = useState(false);
+
+    const handleExport = () => {
+        setExporting(true);
+        try {
+            const tickets = [];
+            for (let i = 0; i < printAmount; i++) tickets.push(generateTicket());
+            const doc = renderTicketsToPDF(tickets);
+            downloadPDF(doc, printAmount);
+            logEvent(EVENT.TICKET_GENERATED, { count: printAmount, type: 'print-export' });
+        } catch (e) {
+            console.error('Export failed:', e);
+        }
+        setExporting(false);
+    };
+
+    const handleSharePrint = async () => {
+        setExporting(true);
+        try {
+            const tickets = [];
+            for (let i = 0; i < printAmount; i++) tickets.push(generateTicket());
+            const doc = renderTicketsToPDF(tickets);
+            await sharePDF(doc, printAmount);
+            logEvent(EVENT.TICKET_GENERATED, { count: printAmount, type: 'print-share' });
+        } catch (e) {
+            if (e.name !== 'AbortError') {
+                console.error('Share failed:', e);
+            }
+        }
+        setExporting(false);
+    };
+
+    return (
+        <div className="max-w-md mx-auto p-4 sm:p-6 flex flex-col items-center text-center animate-fade-in-up">
+            {/* Hero */}
+            <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-600 rounded-full flex items-center justify-center mb-5 shadow-inner">
+                <Printer size={40} strokeWidth={1.5} />
+            </div>
+            <h2 className="text-2xl font-black text-slate-800 mb-1">Print & Share Tickets</h2>
+            <p className="text-slate-500 mb-6 max-w-[320px] text-sm leading-relaxed">
+                Generate bulk tickets to print or share as PDF with players who don't have a smartphone.
+            </p>
+
+            {/* Generator Card */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
+                <label className="text-xs font-bold text-slate-400 justify-center uppercase tracking-wider mb-4 flex">
+                    Number of Tickets
+                </label>
+
+                <div className="flex items-center justify-center gap-4 mb-4">
+                    <button
+                        onClick={() => setPrintAmount(Math.max(1, printAmount - 1))}
+                        className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-emerald-600 transition-colors border border-slate-200 active:scale-95"
+                    >
+                        <Minus size={20} />
+                    </button>
+
+                    <input
+                        type="number"
+                        min={1}
+                        max={100}
+                        value={printAmount}
+                        onChange={(e) => {
+                            const v = parseInt(e.target.value, 10);
+                            if (!isNaN(v)) setPrintAmount(Math.max(1, Math.min(100, v)));
+                            else if (e.target.value === '') setPrintAmount(1);
+                        }}
+                        className="w-20 text-center text-4xl font-black text-slate-800 tabular-nums bg-slate-50 border border-slate-200 rounded-xl py-2 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+
+                    <button
+                        onClick={() => setPrintAmount(Math.min(100, printAmount + 1))}
+                        className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-emerald-600 transition-colors border border-slate-200 active:scale-95"
+                    >
+                        <Plus size={20} />
+                    </button>
+                </div>
+
+                {/* Slider */}
+                <input
+                    type="range"
+                    min={1}
+                    max={100}
+                    value={printAmount}
+                    onChange={(e) => setPrintAmount(Number(e.target.value))}
+                    className="w-full accent-emerald-600 mb-6"
+                />
+                <div className="flex justify-between text-[10px] text-slate-400 -mt-5 mb-6 px-1">
+                    <span>1</span>
+                    <span>50</span>
+                    <span>100</span>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                    <button
+                        onClick={handleExport}
+                        disabled={exporting}
+                        className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-200 active:scale-95 transition-all text-base flex items-center justify-center gap-2 disabled:opacity-60"
+                    >
+                        <FileDown size={20} />
+                        {exporting ? 'Generating…' : 'Export PDF'}
+                    </button>
+                    <button
+                        onClick={handleSharePrint}
+                        disabled={exporting}
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-purple-200 active:scale-95 transition-all text-base flex items-center justify-center gap-2 disabled:opacity-60"
+                    >
+                        <Share2 size={20} />
+                        {exporting ? 'Sharing…' : 'Share'}
+                    </button>
+                </div>
+            </div>
+
+            {/* Info note */}
+            <div className="mt-5 flex items-start gap-2 text-left bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 w-full">
+                <Info size={16} className="text-slate-400 shrink-0 mt-0.5" />
+                <p className="text-xs text-slate-500 leading-relaxed">
+                    Each ticket is <strong>unique</strong> with 15 numbers across 3 rows of 9 columns — ready to print on paper.
+                    PDF is sized for A4 with ~5 tickets per page.
+                </p>
+            </div>
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PLAY MODULE (existing interactive ticket logic)
+// ═══════════════════════════════════════════════════════════════
+function PlayModule() {
     const [tickets, setTickets] = useState([]);
     const [marked, setMarked] = useState({});
     const [amount, setAmount] = useState(1);
@@ -102,7 +260,6 @@ export default function TicketsTab() {
     });
     const [calledNumbers, setCalledNumbers] = useState([]);
 
-    // Load from local storage on mount
     useEffect(() => {
         try {
             const savedTickets = localStorage.getItem(LOCAL_KEY);
@@ -114,7 +271,6 @@ export default function TicketsTab() {
         }
     }, []);
 
-    // Poll calledNumbers from localStorage (host writes them)
     useEffect(() => {
         const poll = () => {
             try {
@@ -127,7 +283,6 @@ export default function TicketsTab() {
         return () => clearInterval(interval);
     }, []);
 
-    // Save to local storage when state changes
     useEffect(() => {
         localStorage.setItem(LOCAL_KEY, JSON.stringify(tickets));
     }, [tickets]);
@@ -162,51 +317,24 @@ export default function TicketsTab() {
         setMarked(prev => ({ ...prev, [num]: !prev[num] }));
     };
 
-    /* ── Export to PDF ── */
     const handleExportPDF = () => {
         if (tickets.length === 0) return;
         setExporting(true);
         try {
             const doc = renderTicketsToPDF(tickets);
-            const pdfBlob = doc.output('blob');
-            const blobUrl = URL.createObjectURL(new Blob([pdfBlob], { type: 'application/pdf' }));
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = `tambola-tickets-${tickets.length}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(blobUrl);
+            downloadPDF(doc, tickets.length);
         } catch (e) {
             console.error('Export failed:', e);
         }
         setExporting(false);
     };
 
-    /* ── Share via Web Share API (shares PDF) ── */
     const handleShare = async () => {
         if (tickets.length === 0) return;
         setExporting(true);
         try {
             const doc = renderTicketsToPDF(tickets);
-            const pdfBlob = doc.output('blob');
-            const file = new File([pdfBlob], `tambola-tickets-${tickets.length}.pdf`, { type: 'application/pdf' });
-
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                    title: 'Tambola Master Tickets',
-                    text: `Here are ${tickets.length} Tambola tickets! Play now at apps.bhopal.dev/tambola`,
-                    files: [file],
-                });
-            } else if (navigator.share) {
-                await navigator.share({
-                    title: 'Tambola Master Tickets',
-                    text: `I just generated ${tickets.length} Tambola tickets! Play now at apps.bhopal.dev/tambola`,
-                    url: 'https://apps.bhopal.dev/tambola/',
-                });
-            } else {
-                handleExportPDF();
-            }
+            await sharePDF(doc, tickets.length);
         } catch (e) {
             if (e.name !== 'AbortError') {
                 console.error('Share failed:', e);
@@ -218,13 +346,13 @@ export default function TicketsTab() {
 
     if (tickets.length === 0) {
         return (
-            <div className="max-w-md mx-auto p-6 pt-12 flex flex-col items-center text-center animate-fade-in-up">
-                <div className="w-24 h-24 bg-indigo-100 text-indigo-500 rounded-full flex items-center justify-center mb-6 shadow-inner">
-                    <Ticket size={48} strokeWidth={1.5} />
+            <div className="max-w-md mx-auto p-4 sm:p-6 pt-8 flex flex-col items-center text-center animate-fade-in-up">
+                <div className="w-20 h-20 bg-indigo-100 text-indigo-500 rounded-full flex items-center justify-center mb-5 shadow-inner">
+                    <Ticket size={40} strokeWidth={1.5} />
                 </div>
-                <h2 className="text-2xl font-black text-slate-800 mb-2">Get Your Tickets</h2>
-                <p className="text-slate-500 mb-8 max-w-[280px]">
-                    Generate up to 10 tickets at once to play along in your hosted game.
+                <h2 className="text-2xl font-black text-slate-800 mb-1">Play Now</h2>
+                <p className="text-slate-500 mb-6 max-w-[300px] text-sm leading-relaxed">
+                    Generate tickets to play along in your hosted game. Tap numbers to mark them as they're called.
                 </p>
 
                 <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full shadow-sm relative overflow-hidden">
@@ -244,18 +372,18 @@ export default function TicketsTab() {
                         <input
                             type="number"
                             min={1}
-                            max={50}
+                            max={10}
                             value={amount}
                             onChange={(e) => {
                                 const v = parseInt(e.target.value, 10);
-                                if (!isNaN(v)) setAmount(Math.max(1, Math.min(50, v)));
+                                if (!isNaN(v)) setAmount(Math.max(1, Math.min(10, v)));
                                 else if (e.target.value === '') setAmount(1);
                             }}
                             className="w-20 text-center text-4xl font-black text-slate-800 tabular-nums bg-slate-50 border border-slate-200 rounded-xl py-2 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
 
                         <button
-                            onClick={() => setAmount(Math.min(50, amount + 1))}
+                            onClick={() => setAmount(Math.min(10, amount + 1))}
                             className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-indigo-600 transition-colors border border-slate-200 active:scale-95"
                         >
                             <Plus size={20} />
@@ -283,7 +411,6 @@ export default function TicketsTab() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    {/* Auto-Daub Toggle */}
                     <button
                         onClick={() => setAutoDaub(!autoDaub)}
                         className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold transition-all ${autoDaub
@@ -296,7 +423,6 @@ export default function TicketsTab() {
                         <span className="hidden sm:inline">Auto</span>
                     </button>
 
-                    {/* Cancel All */}
                     <button
                         onClick={() => setShowCancelConfirm(true)}
                         className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold rounded-xl text-sm transition-colors flex items-center gap-1.5"
@@ -376,6 +502,44 @@ export default function TicketsTab() {
                     </div>
                 </div>
             )}
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MAIN TAB WRAPPER — Sub-tab toggle
+// ═══════════════════════════════════════════════════════════════
+export default function TicketsTab() {
+    const [ticketMode, setTicketMode] = useState('play');
+
+    return (
+        <div className="flex flex-col h-full">
+            {/* ── Sub-Tab Toggle ── */}
+            <div className="max-w-md mx-auto w-full px-4 pt-4">
+                <div className="flex bg-slate-100/80 p-1 rounded-xl">
+                    <button
+                        onClick={() => setTicketMode('play')}
+                        className={`flex-1 py-2.5 font-bold text-sm rounded-lg transition-all flex items-center justify-center gap-2 ${ticketMode === 'play'
+                                ? 'bg-white text-indigo-700 shadow-sm'
+                                : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                            }`}
+                    >
+                        <Gamepad2 size={16} /> Play
+                    </button>
+                    <button
+                        onClick={() => setTicketMode('print')}
+                        className={`flex-1 py-2.5 font-bold text-sm rounded-lg transition-all flex items-center justify-center gap-2 ${ticketMode === 'print'
+                                ? 'bg-white text-emerald-700 shadow-sm'
+                                : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                            }`}
+                    >
+                        <Printer size={16} /> Print & Share
+                    </button>
+                </div>
+            </div>
+
+            {/* ── Active Sub-Module ── */}
+            {ticketMode === 'play' ? <PlayModule /> : <PrintModule />}
         </div>
     );
 }
