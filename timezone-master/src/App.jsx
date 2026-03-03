@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Settings, Plus, MapPin, Search, Trash2, Clock, Globe, ArrowLeft, Bell, Calendar, ExternalLink, ChevronRight, Copy, Check } from 'lucide-react';
+import { Settings, Plus, MapPin, Search, Trash2, Clock, Globe, ArrowLeft, Bell, Calendar, ExternalLink, ChevronRight, Copy, Check, Sparkles } from 'lucide-react';
 import { addMinutes, startOfDay } from 'date-fns';
 import flagData from 'country-flag-emoji-json';
 
@@ -58,7 +58,24 @@ const majorTimezones = [
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('resolver');
-  const [zones, setZones] = useState(getInitialZones);
+  const [zones, setZones] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const zonesParam = params.get('z');
+    if (zonesParam) {
+      try {
+        const decoded = JSON.parse(atob(zonesParam));
+        if (Array.isArray(decoded) && decoded.length > 0) {
+          return decoded.map(z => ({
+            ...z,
+            tz: z.tz || z.timezone // Consistency fix
+          }));
+        }
+      } catch (e) {
+        console.error('Failed to parse zones from URL', e);
+      }
+    }
+    return getInitialZones();
+  });
   const [reminders, setReminders] = useState(getInitialReminders);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -70,9 +87,31 @@ export default function App() {
 
   // The central interactive time (offset in minutes from start of today UTC)
   const [selectedMinutesOffset, setSelectedMinutesOffset] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const offset = params.get('t');
+    if (offset !== null) return parseInt(offset, 10);
+
     const now = new Date();
     return now.getUTCHours() * 60 + now.getUTCMinutes();
   });
+
+  // Sync state to URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('t', selectedMinutesOffset.toString());
+
+    // Encode zones as base64 to keep URL clean-ish
+    const encodedZones = btoa(JSON.stringify(zones.map(z => ({
+      id: z.id,
+      name: z.name,
+      tz: z.tz || z.timezone,
+      country: z.country
+    }))));
+    params.set('z', encodedZones);
+
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, '', newUrl);
+  }, [selectedMinutesOffset, zones]);
 
   // Persistence
   useEffect(() => {
@@ -134,6 +173,47 @@ export default function App() {
     const utcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
     setSelectedMinutesOffset(utcMinutes);
   };
+
+  const suggestGoldenHour = () => {
+    let bestOffset = 0;
+    let maxOverlap = -1;
+
+    // Check every 30 mins
+    for (let offset = 0; offset < 1440; offset += 30) {
+      let overlapCount = 0;
+
+      const referenceDate = new Date();
+      referenceDate.setUTCHours(0, offset, 0, 0);
+
+      zones.forEach(zone => {
+        const parts = new Intl.DateTimeFormat('en-US', {
+          timeZone: zone.tz || zone.timezone,
+          hour: 'numeric',
+          hour12: false
+        }).formatToParts(referenceDate);
+        const hourValue = parts.find(p => p.type === 'hour')?.value;
+        const hour = hourValue ? parseInt(hourValue, 10) : 0;
+
+        // Working hours: 8 AM to 6 PM (18:00)
+        if (hour >= 8 && hour < 18) {
+          overlapCount++;
+        }
+      });
+
+      if (overlapCount > maxOverlap) {
+        maxOverlap = overlapCount;
+        bestOffset = offset;
+      } else if (overlapCount === maxOverlap) {
+        const now = new Date();
+        const currentOffset = now.getUTCHours() * 60 + now.getUTCMinutes();
+        if (Math.abs(offset - currentOffset) < Math.abs(bestOffset - currentOffset)) {
+          bestOffset = offset;
+        }
+      }
+    }
+    setSelectedMinutesOffset(bestOffset);
+  };
+
 
   const getZonedParts = (date, timeZone) => {
     try {
@@ -256,6 +336,14 @@ export default function App() {
                     The Timezone Resolver Synchronizer is an interactive time-anchoring tool for global teams. It uses a draggable UTC offset slider to resolve local times across multiple geographic regions simultaneously. This feature handles international daylight savings time patterns automatically without manual calculation.
                   </p>
                   <div className="flex items-center gap-3">
+                    <button
+                      onClick={suggestGoldenHour}
+                      className="group flex items-center gap-2 px-4 py-2 rounded-2xl bg-primary/10 hover:bg-primary/20 text-primary transition-all active:scale-95 border border-primary/20"
+                      title="Suggest Best Meeting Time"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Golden Hour</span>
+                    </button>
                     <div className="font-mono text-sm bg-slate-800/80 px-4 py-2 rounded-2xl text-primary-light border border-white/5 shadow-inner">
                       {Math.floor(selectedMinutesOffset / 60).toString().padStart(2, '0')}:{(selectedMinutesOffset % 60).toString().padStart(2, '0')} <span className="text-[10px] text-slate-500 font-sans font-black ml-1">UTC</span>
                     </div>
