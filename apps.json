@@ -14,7 +14,7 @@
     },
     {
         "id": "tz-resolver",
-        "name": "Chronosync Pro",
+        "name": "TZ Resolver",
         "description": "Elite Global Meeting Planner & Timezone Synchronizer. Professional-grade tool for remote teams and IT nomads.",
         "path": "/tz-resolver/",
         "icon": "🌐",
