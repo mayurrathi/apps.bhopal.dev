@@ -26,10 +26,18 @@ jobs:
           npm ci
           npm run build
 
+      - name: Install and Build TZ Resolver
+        run: |
+          cd tz-resolver
+          npm ci
+          npm run build
+
       - name: Prepare Deployment Directory
         run: |
           mkdir -p deployment_prep/tambola
+          mkdir -p deployment_prep/tz-resolver
           cp -r tambola/dist/* deployment_prep/tambola/
+          cp -r tz-resolver/dist/* deployment_prep/tz-resolver/
           cp index.html deployment_prep/
           cp apps.json deployment_prep/
           if [ -f "CNAME" ]; then cp CNAME deployment_prep/; fi
