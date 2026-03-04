@@ -297,7 +297,7 @@ export default function App() {
       </div>
 
       {/* Main Layout Wrapper */}
-      <main className="flex-1 flex flex-col min-h-0 w-full max-w-2xl mx-auto relative pt-safe pb-safe">
+      <main className="flex-1 flex flex-col min-h-0 w-full max-w-5xl mx-auto relative pt-safe pb-safe">
 
         {/* Header */}
         <header className="px-6 py-6 flex items-center justify-between shrink-0">
@@ -373,57 +373,60 @@ export default function App() {
               {/* Timezones List */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between px-2">
-                  <h3 className="text-xs font-black text-slate-500 tracking-[0.3em] uppercase">Active Pipelines</h3>
+                  <h3 className="text-xs font-black text-slate-500 tracking-[0.3em] uppercase">Global Grid</h3>
                   <p className="sr-only">
-                    Active Pipelines represent the real-time timezone nodes selected by the user. Each pipeline shows the specific localized date and time based on the active synchronizer anchor. Working hour visualizations (green indicators) highlight colleagues available between 08:00 and 18:00 in their respective local timezones.
+                    The Global Grid displays all timezone nodes selected by the user. Each node shows the localized date and time based on the Synchronizer anchor. Green indicators highlight cities within standard working hours (08:00–18:00).
                   </p>
                   <button onClick={() => setActiveTab('search')} className="bg-primary/20 text-primary hover:bg-primary/30 px-5 py-2 rounded-full text-xs font-black tracking-widest transition-all active:scale-95 shadow-lg shadow-primary/10">
                     + CONNECT CITY
                   </button>
                 </div>
 
-                {zones.length === 0 ? (
-                  <div className="p-12 glass shadow-inner rounded-[2rem] text-center border-dashed border-slate-700">
-                    <Globe className="w-12 h-12 text-slate-800 mx-auto mb-4" />
-                    <p className="text-slate-500 text-sm font-bold">No data nodes connected.</p>
-                  </div>
-                ) : (
-                  zones.map(zone => {
-                    const now = new Date();
-                    const utcStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-                    const anchor = addMinutes(utcStart, selectedMinutesOffset);
-                    const parts = getZonedParts(anchor, zone.tz);
-                    const isWorking = parts.hour24 >= 8 && parts.hour24 <= 18;
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-                    return (
-                      <div key={zone.id} className="w-full glass-dark rounded-3xl p-6 flex items-center justify-between group hover:bg-slate-800/40 hover:border-white/20 transition-all border border-white/5 active:scale-[0.99]">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-1.5 h-12 rounded-full transition-all ${isWorking ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-slate-700'}`}></div>
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-2xl leading-none">{getFlagEmoji(zone.country)}</span>
-                              <h4 className="text-lg font-bold text-white">{zone.name}</h4>
-                              {isWorking && <span className="bg-emerald-500/20 text-emerald-400 text-[8px] font-black px-2 py-0.5 rounded-full">ACTIVE</span>}
+                  {zones.length === 0 ? (
+                    <div className="p-12 glass shadow-inner rounded-[2rem] text-center border-dashed border-slate-700 col-span-full">
+                      <Globe className="w-12 h-12 text-slate-800 mx-auto mb-4" />
+                      <p className="text-slate-500 text-sm font-bold">No cities added yet. Tap "Connect City" to begin.</p>
+                    </div>
+                  ) : (
+                    zones.map(zone => {
+                      const now = new Date();
+                      const utcStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+                      const anchor = addMinutes(utcStart, selectedMinutesOffset);
+                      const parts = getZonedParts(anchor, zone.tz);
+                      const isWorking = parts.hour24 >= 8 && parts.hour24 <= 18;
+
+                      return (
+                        <div key={zone.id} className="w-full glass-dark rounded-3xl p-6 flex items-center justify-between group hover:bg-slate-800/40 hover:border-white/20 transition-all border border-white/5 active:scale-[0.99]">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-1.5 h-12 rounded-full transition-all ${isWorking ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-slate-700'}`}></div>
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-2xl leading-none">{getFlagEmoji(zone.country)}</span>
+                                <h4 className="text-lg font-bold text-white">{zone.name}</h4>
+                                {isWorking && <span className="bg-emerald-500/20 text-emerald-400 text-[8px] font-black px-2 py-0.5 rounded-full">ACTIVE</span>}
+                              </div>
+                              <p className="text-[10px] font-bold text-slate-500 truncate max-w-[150px]">{parts.tzShort} • {zone.tz}</p>
                             </div>
-                            <p className="text-[10px] font-bold text-slate-500 truncate max-w-[150px]">{parts.tzShort} • {zone.tz}</p>
+                          </div>
+                          <div className="flex items-center gap-6">
+                            <div className="text-right">
+                              <p className="text-2xl font-black font-mono text-white tracking-tighter">
+                                {parts.time} <span className="text-xs text-slate-500 font-sans">{parts.amPm}</span>
+                              </p>
+                              <p className="text-[9px] font-black text-primary-light/80 mt-1 uppercase tracking-widest">{parts.date}</p>
+                            </div>
+                            <div className="flex flex-col gap-2 shrink-0">
+                              <button onClick={() => addReminder(zone)} className="bg-white/5 hover:bg-white/10 p-2.5 rounded-xl transition-all" title="Sync Reminder"><Bell className="w-4 h-4 text-emerald-500" /></button>
+                              <button onClick={() => removeZone(zone.id)} className="bg-white/5 hover:bg-red-500/10 p-2.5 rounded-xl transition-all"><Trash2 className="w-4 h-4 text-red-500" /></button>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-6">
-                          <div className="text-right">
-                            <p className="text-2xl font-black font-mono text-white tracking-tighter">
-                              {parts.time} <span className="text-xs text-slate-500 font-sans">{parts.amPm}</span>
-                            </p>
-                            <p className="text-[9px] font-black text-primary-light/80 mt-1 uppercase tracking-widest">{parts.date}</p>
-                          </div>
-                          <div className="flex flex-col gap-2 shrink-0">
-                            <button onClick={() => addReminder(zone)} className="bg-white/5 hover:bg-white/10 p-2.5 rounded-xl transition-all" title="Sync Reminder"><Bell className="w-4 h-4 text-emerald-500" /></button>
-                            <button onClick={() => removeZone(zone.id)} className="bg-white/5 hover:bg-red-500/10 p-2.5 rounded-xl transition-all"><Trash2 className="w-4 h-4 text-red-500" /></button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
+                      );
+                    })
+                  )}
+                </div>
               </div>
             </>
           )}
@@ -480,9 +483,9 @@ export default function App() {
           {activeTab === 'reminders' && (
             <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center justify-between px-2">
-                <h2 className="text-xl font-black text-white flex items-center gap-3"><Bell className="w-6 h-6 text-emerald-500" /> Pipeline Syncs</h2>
+                <h2 className="text-xl font-black text-white flex items-center gap-3"><Bell className="w-6 h-6 text-emerald-500" /> Saved Reminders</h2>
                 <p className="sr-only">
-                  Pipeline Syncs are persistent meeting reminders scheduled via the Timezone Resolver interface. These reminders store the specific UTC offset anchor and provide one-click integration with Google Calendar, allowing IT professionals to automate cross-border meeting scheduling with absolute precision.
+                  Saved Reminders are meeting bookmarks created from the Synchronizer. Each reminder stores the UTC offset anchor and offers one-click Google Calendar integration for cross-timezone scheduling.
                 </p>
                 <span className="text-[10px] font-black bg-slate-800 text-slate-400 px-3 py-1 rounded-full uppercase tracking-tighter">{reminders.length} Anchored</span>
               </div>
@@ -490,7 +493,7 @@ export default function App() {
               {reminders.length === 0 ? (
                 <div className="p-16 glass rounded-[3rem] text-center border-dashed border-slate-800 shadow-inner">
                   <Bell className="w-12 h-12 text-slate-900 mx-auto mb-4 opacity-50" />
-                  <p className="text-slate-500 font-black tracking-widest uppercase text-xs">No active trackers</p>
+                  <p className="text-slate-500 font-black tracking-widest uppercase text-xs">No reminders saved yet</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -520,7 +523,7 @@ export default function App() {
         </div>
 
         {/* Global Navigation */}
-        <nav className="absolute bottom-6 left-6 right-6 glass rounded-[2.5rem] p-3 flex justify-around shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/10 z-50 backdrop-blur-3xl">
+        <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-md glass rounded-[2.5rem] p-3 flex justify-around shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/10 z-50 backdrop-blur-3xl">
           <button onClick={() => setActiveTab('resolver')} className={`flex flex-col flex-1 items-center gap-1.5 py-4 rounded-[1.5rem] transition-all ${activeTab === 'resolver' ? 'text-primary bg-primary/10 shadow-inner' : 'text-slate-500 hover:text-slate-300'}`}>
             <Clock className="w-6 h-6" /><span className="text-[9px] font-black tracking-widest uppercase">Nodes</span>
           </button>
