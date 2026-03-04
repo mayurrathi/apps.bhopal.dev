@@ -55,14 +55,25 @@ const getNowOffset = () => {
   return now.getUTCHours() * 60 + now.getUTCMinutes();
 };
 
+// These two zones are always present and cannot be removed
+const PINNED_ZONES = [
+  { id: 'local', tz: Intl.DateTimeFormat().resolvedOptions().timeZone, name: 'Local Time', country: 'Auto' },
+  { id: 'utc', tz: 'UTC', name: 'Coordinated Universal', country: 'Global' },
+];
+const PINNED_IDS = new Set(PINNED_ZONES.map(z => z.id));
+
 const getInitialZones = () => {
   const saved = localStorage.getItem('tz-resolver-zones');
   if (saved) {
-    try { return JSON.parse(saved); } catch { /* fall through */ }
+    try {
+      const parsed = JSON.parse(saved);
+      // Ensure pinned zones are always at the top
+      const withoutPinned = parsed.filter(z => !PINNED_IDS.has(z.id));
+      return [...PINNED_ZONES, ...withoutPinned];
+    } catch { /* fall through */ }
   }
   return [
-    { id: 'local', tz: Intl.DateTimeFormat().resolvedOptions().timeZone, name: 'Local Time', country: 'Auto' },
-    { id: 'utc', tz: 'UTC', name: 'Coordinated Universal', country: 'Global' },
+    ...PINNED_ZONES,
     { id: 'pst', tz: 'America/Los_Angeles', name: 'Los Angeles', country: 'USA' },
   ];
 };
@@ -192,7 +203,10 @@ export default function App() {
   useEffect(() => { localStorage.setItem('tz-master-24h', use24Hour); }, [use24Hour]);
   useEffect(() => { localStorage.setItem('tz-master-minimal', minimalMode); }, [minimalMode]);
 
-  const removeZone = (idToRemove) => setZones(prev => prev.filter(z => z.id !== idToRemove));
+  const removeZone = (idToRemove) => {
+    if (PINNED_IDS.has(idToRemove)) return; // Never remove pinned zones
+    setZones(prev => prev.filter(z => z.id !== idToRemove));
+  };
 
   const addZone = (cityData) => {
     const newZone = {
@@ -216,12 +230,8 @@ export default function App() {
   };
 
   const loadFastTrack = (track) => {
-    // Keep local time zone at top if present, then fast track zones
-    const localZone = zones.find(z => z.id === 'local');
-    const newZones = localZone
-      ? [localZone, ...track.zones]
-      : track.zones;
-    setZones(newZones);
+    // Always keep pinned zones (Local + UTC) at the top, then fast track zones
+    setZones([...PINNED_ZONES, ...track.zones]);
     setSelectedMinutesOffset(getNowOffset());
     setActiveTab('resolver');
   };
@@ -360,8 +370,8 @@ export default function App() {
             <button
               onClick={() => setMinimalMode(m => !m)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${minimalMode
-                  ? 'bg-accent/20 text-accent border-accent/30'
-                  : 'bg-white/5 text-slate-400 border-white/10 hover:text-slate-200'
+                ? 'bg-accent/20 text-accent border-accent/30'
+                : 'bg-white/5 text-slate-400 border-white/10 hover:text-slate-200'
                 }`}
               title={minimalMode ? 'Switch to Full Mode' : 'Switch to Minimal Mode'}
             >
@@ -514,12 +524,14 @@ export default function App() {
                                 <button onClick={() => addReminder(zone)} className="bg-white/5 hover:bg-emerald-500/10 p-2 rounded-xl transition-all" title="Save Reminder">
                                   <Bell className="w-3.5 h-3.5 text-emerald-500" />
                                 </button>
-                                <button onClick={() => removeZone(zone.id)} className="bg-white/5 hover:bg-red-500/10 p-2 rounded-xl transition-all">
-                                  <Trash2 className="w-3.5 h-3.5 text-red-500" />
-                                </button>
+                                {!PINNED_IDS.has(zone.id) && (
+                                  <button onClick={() => removeZone(zone.id)} className="bg-white/5 hover:bg-red-500/10 p-2 rounded-xl transition-all">
+                                    <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                                  </button>
+                                )}
                               </div>
                             )}
-                            {minimalMode && (
+                            {minimalMode && !PINNED_IDS.has(zone.id) && (
                               <button onClick={() => removeZone(zone.id)} className="bg-white/5 hover:bg-red-500/10 p-1.5 rounded-lg transition-all ml-2">
                                 <Trash2 className="w-3 h-3 text-slate-600 hover:text-red-500" />
                               </button>
